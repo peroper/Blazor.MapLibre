@@ -182,6 +182,15 @@ public partial class Map : ComponentBase, IAsyncDisposable
     /// <returns>A task that represents the asynchronous operation of adding the source.</returns>
     public async ValueTask AddSource(string id, ISource source) =>
         await _jsModule.InvokeVoidAsync("MapInterop.addSource", MapId, id, source);
+    
+    /// <summary>
+    /// Adds a source to the map with the specified identifier and source object.
+    /// </summary>
+    /// <param name="id">A unique identifier for the source.</param>
+    /// <param name="source">The source object to add to the map, pass a serialized json as a byte array.</param>
+    /// <returns>A task that represents the asynchronous operation of adding the source.</returns>
+    public async ValueTask AddSource(string id, byte[] source) =>
+        await _jsModule.InvokeVoidAsync("MapInterop.addSource", MapId, id, source);
 
     /// <summary>
     /// Adds a sprite to the map using the specified sprite id, URL, and optional configuration.

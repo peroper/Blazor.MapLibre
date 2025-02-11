@@ -111,7 +111,13 @@ const MapInterop = {
      * @param {Object} source - The source configuration object to be added.
      */
     addSource: (container, id, source) => {
-        mapInstances[container].addSource(id, source);
+        if (source instanceof Uint8Array) {
+            const sourceAsString = new TextDecoder().decode(source);
+            const sourceAsJson = JSON.parse(sourceAsString);
+            mapInstances[container].addSource(id, sourceAsJson);
+        } else {
+            mapInstances[container].addSource(id, source);    
+        }        
     },
     /**
      * Adds a sprite to the specified map container.
