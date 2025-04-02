@@ -96,7 +96,7 @@ public partial class Map : ComponentBase, IAsyncDisposable
         if (firstRender)
         {
             await JsRuntime.InvokeAsync<IJSObjectReference>("import",
-                "https://unpkg.com/maplibre-gl@^5.0.0/dist/maplibre-gl.js");
+                "./_content/Community.Blazor.MapLibre/maplibre-gl/dist/maplibre-gl.js");
             // Import your JavaScript module
             _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import",
                 "./_content/Community.Blazor.MapLibre/Map.razor.js");
