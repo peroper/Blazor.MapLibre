@@ -97,6 +97,23 @@ export function addControl(container, controlType, position) {
 }
 
 /**
+ * Adds a geolocate control to the given map container.
+ *
+ * @param {string} container - The identifier of the map container.
+ * @param {Object} options - Configuration settings for the Geolocate Control.
+ * @param {string} position - position on the map to which the control will be added. Valid values are 'top-left', 'top-right', 'bottom-left', and 'bottom-right'. Defaults to 'top-right'.
+ */
+export function addGeolocateControl(container, options, position) {
+    const map = mapInstances[container];
+    
+    if (options === undefined || options === null) {
+        map.addControl(new maplibregl.GeolocateControl(), position || undefined);
+    } else {
+        map.addControl(new maplibregl.GeolocateControl(options), position || undefined);
+    }
+}
+
+/**
  * Asynchronously adds an image to a map instance for the specified container.
  *
  * @param {string} container - The identifier of the map container.

@@ -207,6 +207,23 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
 
         await _jsModule.InvokeVoidAsync("addControl", MapId, controlType.ToString(), position);
     }
+    
+    /// <summary>
+    /// Adds a control to the map instance based on the specified control type and options.
+    /// </summary>
+    /// <param name="options">Optional parameters to configure the geolocate control.</param>
+    /// <param name="position">Optional settings or parameters specific to the control being added.</param>
+    /// <returns>A task that represents the asynchronous operation of adding the control.</returns>
+    public async ValueTask AddGeolocateControl(GeolocateControlOptions options, ControlPosition? position = null)
+    {
+        if (_bulkTransaction is not null)
+        {
+            _bulkTransaction.Add("addGeolocateControl", options, position);
+            return;
+        }
+
+        await _jsModule.InvokeVoidAsync("addGeolocateControl", MapId, options, position);
+    }
 
     /// <summary>
     /// Adds an image to the map for use in styling or layer configuration.
