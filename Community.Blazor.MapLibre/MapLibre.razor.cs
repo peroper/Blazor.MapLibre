@@ -301,6 +301,16 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
         await _jsModule.InvokeVoidAsync("setSourceData", MapId, id, source.Data);
     }
 
+    public async ValueTask SetSourceData(string id, object data)
+    {
+        if (_bulkTransaction is not null)
+        {
+            _bulkTransaction.Add("setSourceData", id, data);
+            return;
+        }
+        await _jsModule.InvokeVoidAsync("setSourceData", MapId, id, data);
+    }
+
     /// <summary>
     /// Adds a sprite to the map using the specified sprite id, URL, and optional configuration.
     /// </summary>
