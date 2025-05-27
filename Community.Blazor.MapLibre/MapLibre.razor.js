@@ -114,6 +114,25 @@ export function addGeolocateControl(container, options, position) {
 }
 
 /**
+ * Adds a navigation control to the given map container.
+ *
+ * @param {string} container - The identifier of the map container.
+ * @param {Object} options - Configuration settings for the Navigation Control.
+ * @param {string} position - position on the map to which the control will be added. Valid values are 'top-left', 'top-right', 'bottom-left', and 'bottom-right'. Defaults to 'top-right'.
+ */
+export function addNavigationControl(container, options, position) {
+    const map = mapInstances[container];
+    
+    console.log("addNavigationControl position: " + position);
+
+    if (options === undefined || options === null) {
+        map.addControl(new maplibregl.NavigationControl(), position || undefined);
+    } else {
+        map.addControl(new maplibregl.NavigationControl(options), position || undefined);
+    }
+}
+
+/**
  * Asynchronously adds an image to a map instance for the specified container.
  *
  * @param {string} container - The identifier of the map container.
@@ -1242,4 +1261,14 @@ export async function executeTransaction(container, data) {
                 throw new Error(`Unknown transaction event: ${d.event}`);
         }
     }
+}
+
+/**
+ * Disables all rotation functionality
+ * @param {string} container - The map container.
+ */
+export function disableRotation(container) {
+    mapInstances[container].dragRotate.disable();
+    mapInstances[container].touchZoomRotate.disableRotation();
+    mapInstances[container].keyboard.disableRotation();
 }

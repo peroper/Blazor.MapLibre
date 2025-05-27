@@ -209,10 +209,10 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     }
     
     /// <summary>
-    /// Adds a control to the map instance based on the specified control type and options.
+    /// Adds a geolocate control to the given map container.
     /// </summary>
-    /// <param name="options">Optional parameters to configure the geolocate control.</param>
-    /// <param name="position">Optional settings or parameters specific to the control being added.</param>
+    /// <param name="options">Options to configure the control.</param>
+    /// <param name="position">Optional position on the map to which the control will be added.</param>
     /// <returns>A task that represents the asynchronous operation of adding the control.</returns>
     public async ValueTask AddGeolocateControl(GeolocateControlOptions options, ControlPosition? position = null)
     {
@@ -223,6 +223,23 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
         }
 
         await _jsModule.InvokeVoidAsync("addGeolocateControl", MapId, options, position);
+    }
+    
+    /// <summary>
+    /// Adds a navigation control to the given map container.
+    /// </summary>
+    /// <param name="options">Options to configure the control.</param>
+    /// <param name="position">Optional position on the map to which the control will be added.</param>
+    /// <returns>A task that represents the asynchronous operation of adding the control.</returns>
+    public async ValueTask AddNavigationControl(NavigationControlOptions options, ControlPosition? position = null)
+    {
+        if (_bulkTransaction is not null)
+        {
+            _bulkTransaction.Add("addNavigationControl", options, position);
+            return;
+        }
+
+        await _jsModule.InvokeVoidAsync("addNavigationControl", MapId, options, position);
     }
 
     /// <summary>
@@ -1194,6 +1211,14 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     public async Task CreatePopup(Popup popup, PopupOptions options)
     {
         await _jsModule.InvokeVoidAsync("createPopup", MapId, popup, options);
+    }
+    
+    /// <summary>
+    /// Disables all rotation functionality
+    /// </summary>
+    public async ValueTask DisableRotation()
+    {
+        await _jsModule.InvokeVoidAsync("disableRotation", MapId);
     }
 
     #endregion
