@@ -197,6 +197,17 @@ export function setSourceData(container, id, data) {
 }
 
 /**
+ * Shows the tile boundaries for debug purposes.
+ *
+ * @param {string} container - The identifier for the map container instance.
+ * @param {boolean} shouldShowTileBoundaries
+ */
+export function showTileBoundaries(container, shouldShowTileBoundaries) {
+    const map = mapInstances[container];
+    map.showTileBoundaries = shouldShowTileBoundaries;
+}
+
+/**
  * Adds a sprite to the specified map container.
  *
  * @function

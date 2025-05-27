@@ -207,7 +207,15 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
 
         await _jsModule.InvokeVoidAsync("addControl", MapId, controlType.ToString(), position);
     }
-    
+
+    /// <summary>
+    /// Shows the tile boundaries for debug purposes.
+    /// </summary>
+    public async ValueTask ShowTileBoundaries(bool shouldShowTileBoundaries)
+    {
+        await _jsModule.InvokeVoidAsync("showTileBoundaries", MapId, shouldShowTileBoundaries);
+    }
+
     /// <summary>
     /// Adds a geolocate control to the given map container.
     /// </summary>
