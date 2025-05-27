@@ -1,0 +1,15 @@
+{
+  "version": "3.0",
+  "defaultProvider": "unpkg",
+  "libraries": [
+    {
+      "library": "maplibre-gl@5.5.0",
+      "destination": "wwwroot/maplibre-gl",
+      "files": [
+        "dist/maplibre-gl.js",
+        "dist/maplibre-gl.css"
+      ]
+    }
+  ]
+}
+  

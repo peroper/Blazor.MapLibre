@@ -83,7 +83,7 @@ dotnet add package Community.Blazor.MapLibre
 
 For Blazor Server and Blazor Web App, add this to head of your file to load the css of the maps.
 ```html
-<link href="_content/Community.Blazor.MapLibre/maplibre-5.5.0.min.css" rel="stylesheet" />
+<link href="_content/Community.Blazor.MapLibre/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

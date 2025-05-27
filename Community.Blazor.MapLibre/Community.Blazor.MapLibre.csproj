@@ -28,6 +28,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.10"/>
         <PackageReference Include="OneOf" Version="3.0.271" />
+        <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="3.0.71" />
     </ItemGroup>
 
     <ItemGroup>
