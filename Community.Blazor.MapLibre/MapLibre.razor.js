@@ -105,7 +105,7 @@ export function addControl(container, controlType, position) {
  */
 export function addGeolocateControl(container, options, position) {
     const map = mapInstances[container];
-    
+
     if (options === undefined || options === null) {
         map.addControl(new maplibregl.GeolocateControl(), position || undefined);
     } else {
@@ -122,7 +122,7 @@ export function addGeolocateControl(container, options, position) {
  */
 export function addNavigationControl(container, options, position) {
     const map = mapInstances[container];
-    
+
     console.log("addNavigationControl position: " + position);
 
     if (options === undefined || options === null) {
@@ -180,6 +180,7 @@ export function addSource(container, id, source) {
     mapInstances[container].addSource(id, source);
 }
 
+
 /**
  * Updates the data of a specific GeoJSON source
  *
@@ -194,6 +195,23 @@ export function setSourceData(container, id, data) {
         throw new Error(`Could not find source with id ${id}`);
     }
     source.setData(data);
+}
+
+/**
+ * Updates the data of a specific GeoJSON source
+ *
+ * @param {string} container - The identifier for the map container instance.
+ * @param {string} id - The unique identifier for the source you wish to update.
+ * @param {string} data - The GeoJSON data you wish to apply to the source
+ */
+    export function setSourceDataAsJson(container, id, data) {
+    let jsonData = JSON.parse(data);
+    jsonData = cutAntiMeridian(container, jsonData);
+    const source = mapInstances[container].getSource(id);
+    if (source === undefined) {
+        throw new Error(`Could not find source with id ${id}`);
+    }
+    source.setData(jsonData);
 }
 
 /**
@@ -1266,6 +1284,12 @@ export async function executeTransaction(container, data) {
                 break;
             case "removeSprite":
                 removeSprite(container, d.data[0]);
+                break;
+            case "setSourceData":
+                setSourceData(container, d.data[0], d.data[1]);
+                break;
+            case "setSourceDataAsJson":
+                setSourceDataAsJson(container, d.data[0], d.data[1]);
                 break;
             default:
                 console.warn(`Unknown transaction event: ${d.event}`);

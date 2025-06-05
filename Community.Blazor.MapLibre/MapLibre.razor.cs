@@ -87,14 +87,14 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     /// </summary>
     [Parameter]
     public EventCallback<EventArgs> OnLoad { get; set; }
-    
+
     /// <summary>
     /// Callback event that is triggered when the map style completes loading.
     /// Allows users to execute custom logic upon the successful initialization of the style.
     /// </summary>
     [Parameter]
     public EventCallback<EventArgs> OnStyleLoad { get; set; }
-    
+
     #endregion
 
     /// <summary>
@@ -105,7 +105,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     {
         await OnStyleLoad.InvokeAsync(EventArgs.Empty);
     }
-    
+
     /// <summary>
     /// Invokes the OnLoad event callback when the map component has fully loaded.
     /// </summary>
@@ -130,10 +130,10 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
                 "./_content/Community.Blazor.MapLibre/MapLibre.razor.js");
 
             _dotNetObjectReference = DotNetObjectReference.Create(this);
-            
+
             // Just making sure the Container is being seeded on Create
             Options.Container = MapId;
-            
+
             // Initialize the MapLibre map
             await _jsModule.InvokeVoidAsync("initializeMap", Options, _dotNetObjectReference);
         }
@@ -232,7 +232,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
 
         await _jsModule.InvokeVoidAsync("addGeolocateControl", MapId, options, position);
     }
-    
+
     /// <summary>
     /// Adds a navigation control to the given map container.
     /// </summary>
@@ -309,14 +309,14 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
         await _jsModule.InvokeVoidAsync("setSourceData", MapId, id, source.Data);
     }
 
-    public async ValueTask SetSourceData(string id, object data)
+    public async ValueTask SetSourceDataAsJson(string id, string data)
     {
         if (_bulkTransaction is not null)
         {
-            _bulkTransaction.Add("setSourceData", id, data);
+            _bulkTransaction.Add("setSourceDataAsJson", id, data);
             return;
         }
-        await _jsModule.InvokeVoidAsync("setSourceData", MapId, id, data);
+        await _jsModule.InvokeVoidAsync("setSourceDataAsJson", MapId, id, data);
     }
 
     /// <summary>
@@ -1153,7 +1153,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     /// </param>
     public async ValueTask SetProjection(ProjectionSpecification projection) =>
         await _jsModule.InvokeVoidAsync("setProjection", MapId, projection);
-    
+
     /// <summary>
     /// Sets a zoom level for the map.
     /// </summary>
@@ -1230,7 +1230,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     {
         await _jsModule.InvokeVoidAsync("createPopup", MapId, popup, options);
     }
-    
+
     /// <summary>
     /// Disables all rotation functionality
     /// </summary>
@@ -1243,7 +1243,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
 
     #region Marker
 
-    public async Task AddMarker(MarkerOptions options, LngLat position) 
+    public async Task AddMarker(MarkerOptions options, LngLat position)
         => await _jsModule.InvokeAsync<CenterZoomBearing>("createMarker", MapId, options, position);
 
     #endregion
