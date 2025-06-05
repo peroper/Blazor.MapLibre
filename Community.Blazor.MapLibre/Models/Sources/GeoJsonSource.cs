@@ -18,4 +18,7 @@ public class GeoJsonSource : ISource
     /// </summary>
     [JsonPropertyName("data")]
     public required IFeature Data { get; set; }
+
+    [JsonPropertyName("maxzoom")]
+    public float MaxZoom { get; set; }
 }
