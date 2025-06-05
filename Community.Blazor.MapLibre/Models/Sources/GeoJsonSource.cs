@@ -20,5 +20,6 @@ public class GeoJsonSource : ISource
     public required IFeature Data { get; set; }
 
     [JsonPropertyName("maxzoom")]
-    public float MaxZoom { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public float? MaxZoom { get; set; }
 }
