@@ -880,6 +880,14 @@ export function queryRenderedFeatures(container, query, options) {
     return mapInstances[container].queryRenderedFeatures(query, options);
 }
 
+export function queryRenderedFeaturesWithoutGeometriesReturned(container, query, options) {
+    const features = mapInstances[container].queryRenderedFeatures(query, options);
+    for (const feature of features) {
+        feature.geometry = null;
+    }    
+    return features;
+}
+
 /**
  * Queries features from a source.
  * @param {string} container - The map container.

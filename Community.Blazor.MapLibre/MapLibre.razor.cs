@@ -880,6 +880,9 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     /// <returns>An array of features matching the query.</returns>
     public async ValueTask<object[]> QueryRenderedFeatures(object query, object? options = null) =>
         await _jsModule.InvokeAsync<object[]>("queryRenderedFeatures", MapId, query, options);
+    
+    public async ValueTask<object[]> QueryRenderedFeaturesWithoutGeometriesReturned(object query, object? options = null) =>
+        await _jsModule.InvokeAsync<object[]>("queryRenderedFeaturesWithoutGeometriesReturned", MapId, query, options);
 
     /// <summary>
     /// Returns an array of <see cref="SimpleFeature"/> objects representing features within the specified vector tile or GeoJSON source that satisfy the query parameters.
