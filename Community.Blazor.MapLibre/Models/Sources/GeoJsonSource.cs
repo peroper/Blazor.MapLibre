@@ -17,7 +17,7 @@ public class GeoJsonSource : ISource
     /// The GeoJSON data, either as an inline object or a URL to an external GeoJSON file. Required.
     /// </summary>
     [JsonPropertyName("data")]
-    public required IFeature Data { get; set; }
+    public required object Data { get; set; }
 
     [JsonPropertyName("maxzoom")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
