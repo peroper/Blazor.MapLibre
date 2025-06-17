@@ -19,6 +19,13 @@ public class LineLayer : Layer<LineLayerLayout, LineLayerPaint>
     /// </summary>
     [JsonPropertyName("source")]
     public required string Source { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the name of the source layer to be used for this layer.
+    /// </summary>
+    [JsonPropertyName("source-layer")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public required string SourceLayer { get; set; }
 }
 
 public class LineLayerLayout
