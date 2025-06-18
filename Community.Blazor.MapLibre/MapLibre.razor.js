@@ -1315,3 +1315,7 @@ export function disableRotation(container) {
     mapInstances[container].touchZoomRotate.disableRotation();
     mapInstances[container].keyboard.disableRotation();
 }
+
+export function setLayoutProperty(container, layerId, name, value) {
+    mapInstances[container].setLayoutProperty(layerId, name, value);
+}

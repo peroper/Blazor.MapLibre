@@ -1241,6 +1241,22 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     {
         await _jsModule.InvokeVoidAsync("disableRotation", MapId);
     }
+    
+    /// <summary>
+    /// Sets the value of a layout property in the specified style layer.
+    /// </summary>
+    public async ValueTask SetLayoutProperty(string layerId, string name, string value)
+    {
+        await _jsModule.InvokeVoidAsync("setLayoutProperty", MapId,  layerId, name, value);
+    }
+    
+    /// <summary>
+    /// Sets the filter for the specified style layer.
+    /// </summary>
+    public async ValueTask SetFilter(string layerId, object filter, object? options = null)
+    {
+        await _jsModule.InvokeVoidAsync("setFilter", MapId,  layerId, filter, options);
+    }
 
     #endregion
 
