@@ -881,11 +881,25 @@ export function queryRenderedFeatures(container, query, options) {
 }
 
 export function queryRenderedFeaturesWithoutGeometriesReturned(container, query, options) {
+    const upperLeft = mapInstances[container].unproject([query[0][0], query[0][1]]);
+    const bottomRight = mapInstances[container].unproject([query[1][0], query[1][1]]);
+    
+    const bboxPolygon = turf.bboxPolygon([
+        upperLeft.lng,
+        bottomRight.lat,
+        bottomRight.lng,
+        upperLeft.lat
+    ]);
     const features = mapInstances[container].queryRenderedFeatures(query, options);
-    for (const feature of features) {
+
+    const intersectingFeatures = features.filter(feature =>
+        turf.booleanIntersects(feature.geometry, bboxPolygon.geometry)
+    );
+    
+    for (const feature of intersectingFeatures) {
         feature.geometry = null;
     }    
-    return features;
+    return intersectingFeatures;
 }
 
 /**
@@ -1314,4 +1328,8 @@ export function disableRotation(container) {
     mapInstances[container].dragRotate.disable();
     mapInstances[container].touchZoomRotate.disableRotation();
     mapInstances[container].keyboard.disableRotation();
+}
+
+export function setLayoutProperty(container, layerId, name, value) {
+    mapInstances[container].setLayoutProperty(layerId, name, value);
 }

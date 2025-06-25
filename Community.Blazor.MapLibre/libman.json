@@ -9,6 +9,13 @@
         "dist/maplibre-gl.js",
         "dist/maplibre-gl.css"
       ]
+    },
+    {
+      "library": "@turf/turf@7.2.0",
+      "destination": "wwwroot/turf",
+      "files": [
+        "turf.min.js"
+      ]
     }
   ]
 }
