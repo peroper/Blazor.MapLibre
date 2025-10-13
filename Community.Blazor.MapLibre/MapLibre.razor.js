@@ -804,7 +804,7 @@ export function listens(container, type) {
  * @param {string} container - The map container.
  * @returns {string[]} A list of all image IDs.
  */
-export function istImages(container) {
+export function listImages(container) {
     return mapInstances[container].listImages();
 }
 
