@@ -868,8 +868,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     /// <returns>The projected point as pixel coordinates.</returns>
     public async ValueTask<PointLike> Project(LngLat lngLat)
     {
-        var result = await _jsModule.InvokeAsync<double[]>("project", MapId, lngLat);
-        return PointLike.FromArray(result);
+        return await _jsModule.InvokeAsync<PointLike>("project", MapId, lngLat);
     }
 
     /// <summary>
