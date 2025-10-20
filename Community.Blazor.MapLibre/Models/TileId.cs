@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Community.Blazor.MapLibre.Models;
 
-public class TileId(double x, double y, double z)
+public class TileId(double z, double x, double y)
 {
     [JsonPropertyName("x")]
     public double X { get; set; } = x;
