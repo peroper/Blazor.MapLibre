@@ -1333,3 +1333,18 @@ export function disableRotation(container) {
 export function setLayoutProperty(container, layerId, name, value) {
     mapInstances[container].setLayoutProperty(layerId, name, value);
 }
+
+/**
+ * Refreshes tiles in a specified source.
+ * @param {string} container - The map container.
+ * @param {string} sourceId - The source id
+ * @param {Array<object>} tileIds - Tile id objects with { z, x, y }
+ */
+export function refreshTiles(container, sourceId, tileIds) {
+    if (tileIds === undefined || tileIds === null) {
+        mapInstances[container].refreshTiles(sourceId);
+    } else {
+        mapInstances[container].refreshTiles(sourceId, tileIds);
+    }
+
+}

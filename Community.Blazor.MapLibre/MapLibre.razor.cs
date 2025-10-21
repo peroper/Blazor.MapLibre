@@ -1266,6 +1266,11 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
 
     #endregion
 
+    public async ValueTask RefreshTiles(string sourceId, TileId[]? tileIds = null)
+    {
+        await _jsModule.InvokeVoidAsync("refreshTiles", MapId, sourceId, tileIds);
+    }
+
     #region Bulk Transaction
 
     /// <summary>
