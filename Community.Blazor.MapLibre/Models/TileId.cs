@@ -2,14 +2,14 @@ using System.Text.Json.Serialization;
 
 namespace Community.Blazor.MapLibre.Models;
 
-public class TileId(double z, double x, double y)
+public class TileId(uint z, uint x, uint y)
 {
     [JsonPropertyName("x")]
-    public double X { get; set; } = x;
+    public uint X { get; set; } = x;
 
     [JsonPropertyName("y")]
-    public double Y { get; set; } = y;
+    public uint Y { get; set; } = y;
 
     [JsonPropertyName("z")]
-    public double Z { get; set; } = z;
+    public uint Z { get; set; } = z;
 }
