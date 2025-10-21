@@ -1341,5 +1341,10 @@ export function setLayoutProperty(container, layerId, name, value) {
  * @param {Array<object>} tileIds - Tile id objects with { z, x, y }
  */
 export function refreshTiles(container, sourceId, tileIds) {
-    mapInstances[container].refreshTiles(sourceId, tileIds);
+    if (tileIds === undefined || tileIds === null) {
+        mapInstances[container].refreshTiles(sourceId);
+    } else {
+        mapInstances[container].refreshTiles(sourceId, tileIds);
+    }
+
 }
