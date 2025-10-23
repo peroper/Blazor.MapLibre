@@ -251,6 +251,24 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     }
 
     /// <summary>
+    /// Adds a scale control to the given map container.
+    /// </summary>
+    /// <param name="options">Options to configure the control.</param>
+    /// <param name="position">Optional position on the map to which the control will be added.</param>
+    /// <returns>A task that represents the asynchronous operation of adding the control.</returns>
+    public async ValueTask AddScaleControl(ScaleControlOptions options, ControlPosition? position = null)
+    {
+        if (_bulkTransaction is not null)
+        {
+            _bulkTransaction.Add("addScaleControl", options, position);
+            return;
+        }
+
+        await _jsModule.InvokeVoidAsync("addScaleControl", MapId, options, position);
+    }
+
+
+    /// <summary>
     /// Adds an image to the map for use in styling or layer configuration.
     /// </summary>
     /// <param name="id">The unique identifier for the image to be added to the map.</param>
@@ -879,7 +897,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     /// <returns>An array of features matching the query.</returns>
     public async ValueTask<object[]> QueryRenderedFeatures(object query, object? options = null) =>
         await _jsModule.InvokeAsync<object[]>("queryRenderedFeatures", MapId, query, options);
-    
+
     public async ValueTask<object[]> QueryRenderedFeaturesWithoutGeometriesReturned(object query, object? options = null) =>
         await _jsModule.InvokeAsync<object[]>("queryRenderedFeaturesWithoutGeometriesReturned", MapId, query, options);
 
@@ -1240,7 +1258,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     {
         await _jsModule.InvokeVoidAsync("disableRotation", MapId);
     }
-    
+
     /// <summary>
     /// Sets the value of a layout property in the specified style layer.
     /// </summary>
@@ -1248,7 +1266,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     {
         await _jsModule.InvokeVoidAsync("setLayoutProperty", MapId,  layerId, name, value);
     }
-    
+
     /// <summary>
     /// Sets the filter for the specified style layer.
     /// </summary>

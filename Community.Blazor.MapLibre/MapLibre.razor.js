@@ -133,6 +133,24 @@ export function addNavigationControl(container, options, position) {
 }
 
 /**
+ * Adds a scale control to the given map container.
+ *
+ * @param {string} container - The identifier of the map container.
+ * @param {Object} options - Configuration settings for the Scale Control.
+ * @param {string} position - position on the map to which the control will be added. Valid values are 'top-left', 'top-right', 'bottom-left', and 'bottom-right'. Defaults to 'top-right'.
+ */
+export function addScaleControl(container, options, position) {
+    const map = mapInstances[container];
+    console.log("addScaleControl position: " + position);
+
+    if (options === undefined || options === null) {
+        map.addControl(new maplibregl.ScaleControl(), position || undefined);
+    } else {
+        map.addControl(new maplibregl.ScaleControl(options), position || undefined);
+    }
+}
+
+/**
  * Asynchronously adds an image to a map instance for the specified container.
  *
  * @param {string} container - The identifier of the map container.
@@ -883,7 +901,7 @@ export function queryRenderedFeatures(container, query, options) {
 export function queryRenderedFeaturesWithoutGeometriesReturned(container, query, options) {
     const upperLeft = mapInstances[container].unproject([query[0][0], query[0][1]]);
     const bottomRight = mapInstances[container].unproject([query[1][0], query[1][1]]);
-    
+
     const bboxPolygon = turf.bboxPolygon([
         upperLeft.lng,
         bottomRight.lat,
@@ -895,10 +913,10 @@ export function queryRenderedFeaturesWithoutGeometriesReturned(container, query,
     const intersectingFeatures = features.filter(feature =>
         turf.booleanIntersects(feature.geometry, bboxPolygon.geometry)
     );
-    
+
     for (const feature of intersectingFeatures) {
         feature.geometry = null;
-    }    
+    }
     return intersectingFeatures;
 }
 
