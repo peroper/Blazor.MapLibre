@@ -1145,6 +1145,15 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     /// <param name="state">The state properties to apply to the feature.</param>
     public async ValueTask SetFeatureState(FeatureIdentifier feature, object state) =>
         await _jsModule.InvokeVoidAsync("setFeatureState", MapId, feature, state);
+    
+    /// <summary>
+    /// Sets a global state property that can be retrieved with the global-state expression.
+    /// If the value is null, it resets the property to its default value defined in the state style property.
+    /// </summary>
+    /// <param name="propertyName">The name of the state property to set.</param>
+    /// <param name="value">The value of the state property to set.</param>
+    public async ValueTask SetGlobalStateProperty(string propertyName, object value) =>
+        await _jsModule.InvokeVoidAsync("setGlobalStateProperty", MapId, propertyName, value);
 
     /// <summary>
     /// Sets the map's projection configuration, which determines how geographic coordinates are projected to the screen.

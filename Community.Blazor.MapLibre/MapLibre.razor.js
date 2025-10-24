@@ -1096,6 +1096,16 @@ export function setFeatureState(container, feature, state) {
 }
 
 /**
+ * Sets a global state property.
+ * @param {string} container - The map container.
+ * @param {Object} propertyName - The name of the state property to set.
+ * @param {Object} value - The value of the state property to set.
+ */
+export function setGlobalStateProperty(container, propertyName, value) {
+    mapInstances[container].setGlobalStateProperty(propertyName, value);
+}
+
+/**
  * Sets a filter for a specified layer.
  * @param {string} container - The map container.
  * @param {string} layerId - The layer ID.
