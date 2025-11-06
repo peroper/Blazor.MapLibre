@@ -11,6 +11,7 @@ using Community.Blazor.MapLibre.Models.Padding;
 using Community.Blazor.MapLibre.Models.Sources;
 using Community.Blazor.MapLibre.Models.Sprite;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
 namespace Community.Blazor.MapLibre;
@@ -31,7 +32,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     /// This is dynamically loaded and utilized to invoke JavaScript functions for map initialization and operations.
     /// </summary>
     private IJSObjectReference _jsModule = null!;
-
+    
     /// <summary>
     /// Manages a thread-safe dictionary for storing references to .NET object instances
     /// used in JavaScript interop callbacks. Each reference is identified by a unique Guid.
@@ -125,6 +126,9 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
             await JsRuntime.InvokeAsync<IJSObjectReference>("import",
                 "./_content/Community.Blazor.MapLibre/maplibre-gl/dist/maplibre-gl.js");
 
+            await JsRuntime.InvokeAsync<IJSObjectReference>("import",
+                "./_content/GeoInfoApp.Shared/maplibre-draw-interop.js");
+
             // Import your JavaScript module
             _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import",
                 "./_content/Community.Blazor.MapLibre/MapLibre.razor.js");
@@ -208,6 +212,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
         await _jsModule.InvokeVoidAsync("addControl", MapId, controlType.ToString(), position);
     }
 
+    
     /// <summary>
     /// Shows the tile boundaries for debug purposes.
     /// </summary>
@@ -215,6 +220,20 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     {
         await _jsModule.InvokeVoidAsync("showTileBoundaries", MapId, shouldShowTileBoundaries);
     }
+
+
+    public async Task AddDrawToolAsync()
+    {
+        await _jsModule.InvokeVoidAsync("addDrawTool", MapId, ControlPosition.BottomLeft);
+    }
+    public async Task AddTerraDrawToolAsync()
+    {
+        await _jsModule.InvokeVoidAsync("addTerraDrawTool", MapId, ControlPosition.BottomLeft);
+    }
+
+
+    [JSInvokable] public Task OnTerraDrawReady() => Task.CompletedTask;
+    [JSInvokable] public Task OnTerraDrawChanged(string geoJson) => Task.CompletedTask;
 
     /// <summary>
     /// Adds a geolocate control to the given map container.
