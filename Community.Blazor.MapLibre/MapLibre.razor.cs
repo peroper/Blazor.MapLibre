@@ -32,7 +32,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     /// This is dynamically loaded and utilized to invoke JavaScript functions for map initialization and operations.
     /// </summary>
     private IJSObjectReference _jsModule = null!;
-    
+
     /// <summary>
     /// Manages a thread-safe dictionary for storing references to .NET object instances
     /// used in JavaScript interop callbacks. Each reference is identified by a unique Guid.
@@ -126,8 +126,6 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
             await JsRuntime.InvokeAsync<IJSObjectReference>("import",
                 "./_content/Community.Blazor.MapLibre/maplibre-gl/dist/maplibre-gl.js");
 
-            await JsRuntime.InvokeAsync<IJSObjectReference>("import",
-                "./_content/GeoInfoApp.Shared/maplibre-draw-interop.js");
 
             // Import your JavaScript module
             _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import",
@@ -212,7 +210,6 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
         await _jsModule.InvokeVoidAsync("addControl", MapId, controlType.ToString(), position);
     }
 
-    
     /// <summary>
     /// Shows the tile boundaries for debug purposes.
     /// </summary>
@@ -221,16 +218,20 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
         await _jsModule.InvokeVoidAsync("showTileBoundaries", MapId, shouldShowTileBoundaries);
     }
 
-
-    public async Task AddDrawToolAsync()
-    {
-        await _jsModule.InvokeVoidAsync("addDrawTool", MapId, ControlPosition.BottomLeft);
-    }
     public async Task AddTerraDrawToolAsync()
     {
         await _jsModule.InvokeVoidAsync("addTerraDrawTool", MapId, ControlPosition.BottomLeft);
     }
 
+    public async Task ToggleTerraDrawModeAsync(string tool)
+    {
+        await _jsModule.InvokeVoidAsync("startTerraDrawMode", MapId, tool);
+    }
+
+    public async Task FinishGeometryAsync()
+    {
+        await _jsModule.InvokeVoidAsync("finishGeometry", MapId);
+    }
 
     [JSInvokable] public Task OnTerraDrawReady() => Task.CompletedTask;
     [JSInvokable] public Task OnTerraDrawChanged(string geoJson) => Task.CompletedTask;
@@ -1182,7 +1183,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     /// <param name="state">The state properties to apply to the feature.</param>
     public async ValueTask SetFeatureState(FeatureIdentifier feature, object state) =>
         await _jsModule.InvokeVoidAsync("setFeatureState", MapId, feature, state);
-    
+
     /// <summary>
     /// Sets a global state property that can be retrieved with the global-state expression.
     /// If the value is null, it resets the property to its default value defined in the state style property.
