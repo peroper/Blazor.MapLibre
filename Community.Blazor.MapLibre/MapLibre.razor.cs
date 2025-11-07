@@ -232,18 +232,19 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     }
 
     /// <summary>
+    /// Stop terra-draw
+    /// </summary>
+    public async Task StopTerraDrawAsync()
+    {
+        await _jsModule.InvokeVoidAsync("stopTerraDraw", MapId);
+    }
+    /// <summary>
     /// Start the selected terra-draw mode
     /// </summary>
-    /// /// <param name="mode">The name of the mode to start.</param>
-
-    public async Task StartTerraModeAsync(string mode)
+    /// <param name="mode">The name of the mode to start.</param>
+    public async Task SetTerraDrawModeAsync(string mode)
     {
-        if (_bulkTransaction is not null)
-        {
-            _bulkTransaction.Add("startTerraDrawMode", mode);
-            return;
-        }
-        await _jsModule.InvokeVoidAsync("startTerraDrawMode", MapId, mode);
+        await _jsModule.InvokeVoidAsync("setTerraDrawMode", MapId, mode);
     }
 
     /// <summary>

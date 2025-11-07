@@ -160,10 +160,10 @@ export function addTerraDrawTool(container, options) {
                     return { valid: true }
                 },
                 feature: {
-                    scaleable: true,
                     coordinates: {
                         midpoints: true,
-                        draggable: true
+                        draggable: true,
+                        snappable: true
                     }
                 }
             },
@@ -171,7 +171,8 @@ export function addTerraDrawTool(container, options) {
                 feature: {
                     coordinates: {
                         midpoints: true,
-                        draggable: true
+                        draggable: true,
+                        snappable: true
                     }
                 }
             }
@@ -189,14 +190,25 @@ export function addTerraDrawTool(container, options) {
 }
 
 /**
- * Start selected terra-draw mode.
+ * Stop terra-draw.
+ *
+ * @param {string} container - The identifier of the map container.
+ */
+export function stopTerraDraw(container) {
+    const draw = drawControls[container];
+    draw.setMode("static");
+    draw.stop()
+}
+
+/**
+ * Set selected terra-draw mode.
  *
  * @param {string} container - The identifier of the map container.
  * @param {Object} mode - Terra-draw mode to start.
  */
-export function startTerraDrawMode(container, mode) {
+export function setTerraDrawMode(container, mode) {
     const draw = drawControls[container];
-    draw.start();
+    draw.start()
     draw.setMode(mode);
 }
 
