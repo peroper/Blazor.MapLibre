@@ -135,9 +135,15 @@ export function addNavigationControl(container, options, position) {
 }
 
 
-
-export function addTerraDrawTool(container, position) {
+/**
+ * Adds a terra-draw instance to the given map container.
+ *
+ * @param {string} container - The identifier of the map container.
+ * @param {Object} options - Configuration settings for the Scale Control.
+ */
+export function addTerraDrawTool(container, options) {
     const map = mapInstances[container];
+    // TODO: Make configurable via options
     var adapter = new terraDrawMaplibreGlAdapter.TerraDrawMapLibreGLAdapter({ map })
     var select = new terraDraw.TerraDrawSelectMode({
         flags: {
@@ -182,21 +188,29 @@ export function addTerraDrawTool(container, position) {
     drawControls[container] = new terraDraw.TerraDraw({adapter: adapter, modes: [new terraDraw.TerraDrawFreehandMode(), polygonMode, new terraDraw.TerraDrawLineStringMode(), select, new terraDraw.TerraDrawPointMode()]})
 }
 
-export function startTerraDrawMode(container, tool) {
+/**
+ * Start selected terra-draw mode.
+ *
+ * @param {string} container - The identifier of the map container.
+ * @param {Object} mode - Terra-draw mode to start.
+ */
+export function startTerraDrawMode(container, mode) {
     const draw = drawControls[container];
     draw.start();
-    draw.setMode(tool);
+    draw.setMode(mode);
 }
 
+/**
+ * Finish the geometry currently being edited.
+ *
+ * @param {string} container - The identifier of the map container.
+ */
 export function finishGeometry(container) {
-    const map = mapInstances[container];
-
     const event = new KeyboardEvent("keyup", {
         key: "Enter"
     });
     const element = getCanvas(container)
     element.dispatchEvent(event);
-    // Dispatch the event on the document or a specific element
 }
 
 /**

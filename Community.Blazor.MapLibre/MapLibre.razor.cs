@@ -218,18 +218,44 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
         await _jsModule.InvokeVoidAsync("showTileBoundaries", MapId, shouldShowTileBoundaries);
     }
 
+    /// <summary>
+    /// Add a terra-draw instance for drawing geometries
+    /// </summary>
     public async Task AddTerraDrawToolAsync()
     {
-        await _jsModule.InvokeVoidAsync("addTerraDrawTool", MapId, ControlPosition.BottomLeft);
+        if (_bulkTransaction is not null)
+        {
+            _bulkTransaction.Add("addTerraDrawTool");
+            return;
+        }
+        await _jsModule.InvokeVoidAsync("addTerraDrawTool", MapId);
     }
 
-    public async Task ToggleTerraDrawModeAsync(string tool)
+    /// <summary>
+    /// Start the selected terra-draw mode
+    /// </summary>
+    /// /// <param name="mode">The name of the mode to start.</param>
+
+    public async Task StartTerraModeAsync(string mode)
     {
-        await _jsModule.InvokeVoidAsync("startTerraDrawMode", MapId, tool);
+        if (_bulkTransaction is not null)
+        {
+            _bulkTransaction.Add("startTerraDrawMode", mode);
+            return;
+        }
+        await _jsModule.InvokeVoidAsync("startTerraDrawMode", MapId, mode);
     }
 
+    /// <summary>
+    /// Finish / Close the geometry being edited (simulates enter-key event)
+    /// </summary>
     public async Task FinishGeometryAsync()
     {
+        if (_bulkTransaction is not null)
+        {
+            _bulkTransaction.Add("finishGeometry");
+            return;
+        }
         await _jsModule.InvokeVoidAsync("finishGeometry", MapId);
     }
 
