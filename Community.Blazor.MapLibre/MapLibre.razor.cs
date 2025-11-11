@@ -1338,6 +1338,15 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     public async Task AddMarker(MarkerOptions options, LngLat position)
         => await _jsModule.InvokeAsync<CenterZoomBearing>("createMarker", MapId, options, position);
 
+    public async Task CreateCurrentLocationMarker(MarkerOptions options, LngLat position)
+        => await _jsModule.InvokeVoidAsync("createCurrentLocationMarker", MapId, options, position);
+    
+    public async Task MoveCurrentLocationMarker(LngLat position)
+        => await _jsModule.InvokeVoidAsync("moveCurrentLocationMarker", MapId, position);
+    
+    public async Task RemoveCurrentLocationMarker()
+        => await _jsModule.InvokeVoidAsync("removeCurrentLocationMarker", MapId);
+
     #endregion
 
     public async ValueTask RefreshTiles(string sourceId, TileId[]? tileIds = null)

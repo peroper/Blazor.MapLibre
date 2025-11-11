@@ -24,7 +24,7 @@ public class MarkerOptions
     public string? ClassName { get; set; }
 
     /// <summary>
-    /// The max number of pixels a user can shift the mouse pointer during a click on the marker for it to be 
+    /// The max number of pixels a user can shift the mouse pointer during a click on the marker for it to be
     /// considered a valid click (as opposed to a marker drag). The default is to inherit map's clickTolerance.
     /// </summary>
     [JsonPropertyName("clickTolerance")]
@@ -52,7 +52,14 @@ public class MarkerOptions
     public ElementReference? Element { get; set; }
 
     /// <summary>
-    /// The offset in pixels as a [x, y] array to apply relative to the element's center. 
+    /// DOM element id to use as a marker.
+    /// </summary>
+    [JsonPropertyName("elementId")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ElementId { get; set; }
+
+    /// <summary>
+    /// The offset in pixels as a [x, y] array to apply relative to the element's center.
     /// Negatives indicate left and up.
     /// </summary>
     [JsonPropertyName("offset")]
@@ -100,7 +107,7 @@ public class MarkerOptions
     public MarkerAlignment? RotationAlignment { get; set; }
 
     /// <summary>
-    /// The scale to use for the default marker if options.element is not provided. 
+    /// The scale to use for the default marker if options.element is not provided.
     /// The default scale corresponds to a height of 41px and a width of 27px.
     /// </summary>
     [JsonPropertyName("scale")]

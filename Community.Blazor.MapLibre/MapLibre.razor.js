@@ -2,6 +2,7 @@
 
 const mapInstances = {};
 const optionsInstances = {};
+const currentLocationMarkerInstances = {};
 const drawControls = {};
 /**
  * Cuts the GeoJSON source at the antimeridian if the option is enabled.
@@ -1383,6 +1384,35 @@ export function createMarker(container, options, position) {
     new maplibregl.Marker(options)
         .setLngLat([position.lng, position.lat])
         .addTo(mapInstances[container]);
+}
+
+export function createCurrentLocationMarker(container, options, position) {
+    let elementId = options.elementId;
+    if (!!elementId) {
+        options.element = document.getElementById(elementId);
+    }
+
+    let marker = new maplibregl.Marker(options);
+    marker
+        .setLngLat([position.lng, position.lat])
+        .addTo(mapInstances[container]);
+
+    currentLocationMarkerInstances[container] = marker;
+}
+
+export function moveCurrentLocationMarker(container, position) {
+    let marker = currentLocationMarkerInstances[container];
+    if (marker) {
+        marker.setLngLat([position.lng, position.lat]);
+    }
+}
+
+export function removeCurrentLocationMarker(container) {
+    let marker = currentLocationMarkerInstances[container];
+    if (marker) {
+        marker.remove()
+        delete currentLocationMarkerInstances[container];
+    }
 }
 
 /**
