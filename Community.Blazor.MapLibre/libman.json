@@ -16,7 +16,16 @@
       "files": [
         "turf.min.js"
       ]
+    },
+    {
+      "library": "terra-draw@1.18.0",
+      "destination": "wwwroot/terra-draw",
+      "files": [ "dist/terra-draw.umd.js" ]
+    },
+    {
+      "library": "terra-draw-maplibre-gl-adapter@1.2.2",
+      "destination": "wwwroot/terra-draw",
+      "files": [ "dist/terra-draw-maplibre-gl-adapter.umd.js" ]
     }
   ]
 }
-  
