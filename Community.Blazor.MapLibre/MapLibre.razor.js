@@ -1,9 +1,9 @@
-import splitGeoJSON from './geojson-antimeridian-cut/cut.js'
+
 
 const mapInstances = {};
 const optionsInstances = {};
 const currentLocationMarkerInstances = {};
-
+const drawControls = {};
 /**
  * Cuts the GeoJSON source at the antimeridian if the option is enabled.
  *
@@ -38,7 +38,9 @@ export function initializeMap(options, dotnetReference) {
     map.on('load', function () {
         dotnetReference.invokeMethodAsync("OnLoadCallback")
     });
+
 }
+
 
 /**
  * Attaches an event listener to a specified map instance.
@@ -131,6 +133,97 @@ export function addNavigationControl(container, options, position) {
     } else {
         map.addControl(new maplibregl.NavigationControl(options), position || undefined);
     }
+}
+
+
+/**
+ * Adds a terra-draw instance to the given map container.
+ *
+ * @param {string} container - The identifier of the map container.
+ * @param {Object} options - Configuration settings for the Scale Control.
+ */
+export function addTerraDrawTool(container, options) {
+    const map = mapInstances[container];
+    // TODO: Make configurable via options
+    var adapter = new terraDrawMaplibreGlAdapter.TerraDrawMapLibreGLAdapter({ map })
+    var select = new terraDraw.TerraDrawSelectMode({
+        flags: {
+            point: {
+                feature: {
+                    draggable: true
+                }
+            },
+            polygon: {
+                validation: (feature, { updateType }) => {
+                    if (updateType === "finish" || updateType === "commit") {
+                        return terraDraw.ValidateNotSelfIntersecting(feature);
+                    }
+                    return { valid: true }
+                },
+                feature: {
+                    coordinates: {
+                        midpoints: true,
+                        draggable: true,
+                        snappable: true
+                    }
+                }
+            },
+            linestring: {
+                feature: {
+                    coordinates: {
+                        midpoints: true,
+                        draggable: true,
+                        snappable: true
+                    }
+                }
+            }
+        }
+    });
+    const polygonMode = new terraDraw.TerraDrawPolygonMode({
+        validation: (feature, { updateType }) => {
+            if (updateType === "finish" || updateType === "commit") {
+                return terraDraw.ValidateNotSelfIntersecting(feature);
+            }
+            return { valid: true }
+        }
+    })
+    drawControls[container] = new terraDraw.TerraDraw({adapter: adapter, modes: [new terraDraw.TerraDrawFreehandMode(), polygonMode, new terraDraw.TerraDrawLineStringMode(), select, new terraDraw.TerraDrawPointMode()]})
+}
+
+/**
+ * Stop terra-draw.
+ *
+ * @param {string} container - The identifier of the map container.
+ */
+export function stopTerraDraw(container) {
+    const draw = drawControls[container];
+    draw.setMode("static");
+    draw.stop()
+}
+
+/**
+ * Set selected terra-draw mode.
+ *
+ * @param {string} container - The identifier of the map container.
+ * @param {Object} mode - Terra-draw mode to start.
+ */
+export function setTerraDrawMode(container, mode) {
+    const draw = drawControls[container];
+    draw.start()
+    draw.setMode(mode);
+}
+
+/**
+ * Finish the geometry currently being edited.
+ *
+ * @param {string} container - The identifier of the map container.
+ */
+export function finishGeometry(container) {
+    const event = new KeyboardEvent("keyup", {
+        key: "Enter"
+    });
+    const element = getCanvas(container)
+    element.dispatchEvent(event);
 }
 
 /**

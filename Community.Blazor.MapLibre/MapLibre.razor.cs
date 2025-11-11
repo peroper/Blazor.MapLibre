@@ -11,6 +11,7 @@ using Community.Blazor.MapLibre.Models.Padding;
 using Community.Blazor.MapLibre.Models.Sources;
 using Community.Blazor.MapLibre.Models.Sprite;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
 namespace Community.Blazor.MapLibre;
@@ -125,6 +126,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
             await JsRuntime.InvokeAsync<IJSObjectReference>("import",
                 "./_content/Community.Blazor.MapLibre/maplibre-gl/dist/maplibre-gl.js");
 
+
             // Import your JavaScript module
             _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import",
                 "./_content/Community.Blazor.MapLibre/MapLibre.razor.js");
@@ -215,6 +217,51 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     {
         await _jsModule.InvokeVoidAsync("showTileBoundaries", MapId, shouldShowTileBoundaries);
     }
+
+    /// <summary>
+    /// Add a terra-draw instance for drawing geometries
+    /// </summary>
+    public async Task AddTerraDrawToolAsync()
+    {
+        if (_bulkTransaction is not null)
+        {
+            _bulkTransaction.Add("addTerraDrawTool");
+            return;
+        }
+        await _jsModule.InvokeVoidAsync("addTerraDrawTool", MapId);
+    }
+
+    /// <summary>
+    /// Stop terra-draw
+    /// </summary>
+    public async Task StopTerraDrawAsync()
+    {
+        await _jsModule.InvokeVoidAsync("stopTerraDraw", MapId);
+    }
+    /// <summary>
+    /// Start the selected terra-draw mode
+    /// </summary>
+    /// <param name="mode">The name of the mode to start.</param>
+    public async Task SetTerraDrawModeAsync(string mode)
+    {
+        await _jsModule.InvokeVoidAsync("setTerraDrawMode", MapId, mode);
+    }
+
+    /// <summary>
+    /// Finish / Close the geometry being edited (simulates enter-key event)
+    /// </summary>
+    public async Task FinishGeometryAsync()
+    {
+        if (_bulkTransaction is not null)
+        {
+            _bulkTransaction.Add("finishGeometry");
+            return;
+        }
+        await _jsModule.InvokeVoidAsync("finishGeometry", MapId);
+    }
+
+    [JSInvokable] public Task OnTerraDrawReady() => Task.CompletedTask;
+    [JSInvokable] public Task OnTerraDrawChanged(string geoJson) => Task.CompletedTask;
 
     /// <summary>
     /// Adds a geolocate control to the given map container.
@@ -1163,7 +1210,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     /// <param name="state">The state properties to apply to the feature.</param>
     public async ValueTask SetFeatureState(FeatureIdentifier feature, object state) =>
         await _jsModule.InvokeVoidAsync("setFeatureState", MapId, feature, state);
-    
+
     /// <summary>
     /// Sets a global state property that can be retrieved with the global-state expression.
     /// If the value is null, it resets the property to its default value defined in the state style property.
