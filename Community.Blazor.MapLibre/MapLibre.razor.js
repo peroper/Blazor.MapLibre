@@ -1387,6 +1387,11 @@ export function createMarker(container, options, position) {
 }
 
 export function createCurrentLocationMarker(container, options, position) {
+    let elementId = options.elementId;
+    if (!!elementId) {
+        options.element = document.getElementById(elementId);
+    }
+
     let marker = new maplibregl.Marker(options);
     marker
         .setLngLat([position.lng, position.lat])
@@ -1406,7 +1411,7 @@ export function removeCurrentLocationMarker(container) {
     let marker = currentLocationMarkerInstances[container];
     if (marker) {
         marker.remove()
-        delete currentLocationMarkerInstances[container];    
+        delete currentLocationMarkerInstances[container];
     }
 }
 
