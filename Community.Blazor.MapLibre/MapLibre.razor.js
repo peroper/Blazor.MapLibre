@@ -227,6 +227,18 @@ export function finishGeometry(container) {
 }
 
 /**
+ * Get created geometries from terra-draw.
+ *
+ * @param {string} container - The identifier of the map container.
+ * @returns {Array} geometries - The created geometries.
+ */
+export function getTerraDrawGeometries(container)
+{
+    const draw = drawControls[container];
+    return draw.getSnapshot();
+}
+
+/**
  * Adds a scale control to the given map container.
  *
  * @param {string} container - The identifier of the map container.
