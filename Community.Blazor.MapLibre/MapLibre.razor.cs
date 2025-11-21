@@ -905,7 +905,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     /// </summary>
     /// <param name="id">The ID of the layer to move.</param>
     /// <param name="beforeId">The ID of the target layer to place the layer before.</param>
-    public async ValueTask MoveLayer(string id, string beforeId) =>
+    public async ValueTask MoveLayer(string id, string? beforeId) =>
         await _jsModule.InvokeVoidAsync("moveLayer", MapId, id, beforeId);
 
     /// <summary>
