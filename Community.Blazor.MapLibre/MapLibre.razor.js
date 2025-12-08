@@ -238,6 +238,30 @@ export function getTerraDrawGeometries(container)
     return draw.getSnapshot();
 }
 
+export function onTerraDrawFinish(container, dotnetReference) {
+    const draw = drawControls[container];
+
+    draw.on("finish", (id, context) => {
+        if (context.action === "draw" || context.action === "dragCoordinate") {
+            const features = draw.getSnapshot();
+            const featuresAsJson = JSON.stringify(features);
+            dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
+        }
+    });
+}
+
+export function onTerraDrawDelete(container, dotnetReference) {
+    const draw = drawControls[container];
+
+    draw.on("change", (ids, type) => {
+        if (type === "delete") {
+            const features = draw.getSnapshot();
+            const featuresAsJson = JSON.stringify(features);
+            dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
+        }
+    });
+}
+
 /**
  * Adds a scale control to the given map container.
  *

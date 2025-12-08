@@ -270,6 +270,29 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     
     [JSInvokable] public Task OnTerraDrawReady() => Task.CompletedTask;
     [JSInvokable] public Task OnTerraDrawChanged(string geoJson) => Task.CompletedTask;
+    
+    
+    public async Task<Listener> AddTerraDrawFinishListener<T>(Action<T> handler)
+    {
+        var callback = new CallbackHandler(_jsModule, "finish", handler, typeof(T));
+        var reference = DotNetObjectReference.Create(callback);
+        _references.TryAdd(Guid.NewGuid(), reference);
+
+        await _jsModule.InvokeVoidAsync("onTerraDrawFinish", MapId, reference);
+
+        return new Listener(callback);
+    }
+    
+    public async Task<Listener> AddTerraDrawDeleteListener<T>(Action<T> handler)
+    {
+        var callback = new CallbackHandler(_jsModule, "delete", handler, typeof(T));
+        var reference = DotNetObjectReference.Create(callback);
+        _references.TryAdd(Guid.NewGuid(), reference);
+
+        await _jsModule.InvokeVoidAsync("onTerraDrawDelete", MapId, reference);
+
+        return new Listener(callback);
+    }
 
     /// <summary>
     /// Adds a geolocate control to the given map container.
