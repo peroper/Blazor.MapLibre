@@ -126,8 +126,6 @@ export function addGeolocateControl(container, options, position) {
 export function addNavigationControl(container, options, position) {
     const map = mapInstances[container];
 
-    console.log("addNavigationControl position: " + position);
-
     if (options === undefined || options === null) {
         map.addControl(new maplibregl.NavigationControl(), position || undefined);
     } else {
