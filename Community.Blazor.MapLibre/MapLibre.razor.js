@@ -185,7 +185,8 @@ export function addTerraDrawTool(container, options) {
             return { valid: true }
         }
     })
-    drawControls[container] = new terraDraw.TerraDraw({adapter: adapter, modes: [new terraDraw.TerraDrawFreehandMode(), polygonMode, new terraDraw.TerraDrawLineStringMode(), select, new terraDraw.TerraDrawPointMode()]})
+    const deleteMode = new TerraDrawCoordinateDeleteModeUmd();
+    drawControls[container] = new terraDraw.TerraDraw({adapter: adapter, modes: [new terraDraw.TerraDrawFreehandMode(), polygonMode, new terraDraw.TerraDrawLineStringMode(), select, new terraDraw.TerraDrawPointMode(), deleteMode]})
 }
 
 /**

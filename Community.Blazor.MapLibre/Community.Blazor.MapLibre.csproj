@@ -35,6 +35,9 @@
         <None Include="..\README.md" Pack="true" PackagePath="\"/>
         <Content Remove="libman.json" />
         <None Include="libman.json" />
+        <Content Update="wwwroot\terra-draw\dist\TerraDrawCoordinateDeleteMode.js">
+          <PublishFolderType>Content</PublishFolderType>
+        </Content>
     </ItemGroup>
 
 </Project>
