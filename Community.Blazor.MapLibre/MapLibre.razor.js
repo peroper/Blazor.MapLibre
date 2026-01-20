@@ -261,6 +261,18 @@ export function onTerraDrawDelete(container, dotnetReference) {
     });
 }
 
+export function onTerraDrawChange(container, dotnetReference) {
+    const draw = drawControls[container];
+
+    draw.on('change', (ids, type) => {
+        if (type === 'create' || type === 'update' || type === 'delete') {
+            const features = draw.getSnapshot();
+            const featuresAsJson = JSON.stringify(features);
+            dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
+        }
+    });
+}
+
 /**
  * Adds a scale control to the given map container.
  *
