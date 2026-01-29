@@ -261,14 +261,14 @@ export function onTerraDrawDelete(container, dotnetReference) {
     });
 }
 
-export function onTerraDrawChange(container, dotnetReference) {
+export function onTerraDrawChange(container, dotnetReference, throttleTime = 100) {
     const draw = drawControls[container];
 
     const throttledInvoke = throttle(() => {
         const features = draw.getSnapshot();
         const featuresAsJson = JSON.stringify(features);
         dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
-    }, 1000);
+    }, throttleTime);
 
     draw.on('change', (ids, type) => {
         if (type === 'create' || type === 'update' || type === 'delete') {
