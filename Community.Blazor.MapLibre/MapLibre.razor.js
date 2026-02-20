@@ -1560,13 +1560,37 @@ export function setLayoutProperty(container, layerId, name, value) {
  * Refreshes tiles in a specified source.
  * @param {string} container - The map container.
  * @param {string} sourceId - The source id
- * @param {Array<object>} tileIds - Tile id objects with { z, x, y }
  */
-export function refreshTiles(container, sourceId, tileIds) {
+export function refreshTiles(container, sourceId ) {
     if (tileIds === undefined || tileIds === null) {
         mapInstances[container].refreshTiles(sourceId);
     } else {
         mapInstances[container].refreshTiles(sourceId, tileIds);
     }
 
+}
+/**
+ * Refreshes tiles in a specified source and tiles.
+ * @param {string} container - The map container.
+ * @param {string} sourceId - The source id
+ * @param {Array<object>} tileIds - Tile id objects with { z, x, y }
+ */
+export function refreshTileIDs(container, sourceId, tileIds) {
+    const mapInstance = mapInstances[container];
+    const tileManager = mapInstance.style.tileManagers[sourceId];
+
+
+    for (const id of tileManager._inViewTiles.getAllIds()) {
+        const tile = tileManager._inViewTiles.getTileById(id);
+        const c = tile.tileID.canonical;
+
+        if (tileIds.some(t => t.z === c.z && t.x === c.x && t.y === c.y)) {
+            tileManager._reloadTile(id, 'expired');
+        }
+    }
+    tileManager._outOfViewCache.filter(tile =>
+        !tileIds.some(t => t.z === tile.tileID.canonical.z &&
+            t.x === tile.tileID.canonical.x &&
+            t.y === tile.tileID.canonical.y)
+    );
 }
