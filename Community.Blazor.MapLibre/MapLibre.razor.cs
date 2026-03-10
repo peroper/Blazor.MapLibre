@@ -356,6 +356,14 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
         await _jsModule.InvokeVoidAsync("addScaleControl", MapId, options, position);
     }
 
+    /// <summary>
+    /// Updates the unit of the scale control.
+    /// </summary>
+    /// <param name="unit">The unit to set ("metric", "imperial", or "nautical").</param>
+    public async ValueTask SetScaleControlUnit(string unit)
+    {
+        await _jsModule.InvokeVoidAsync("setScaleControlUnit", MapId, unit);
+    }
 
     /// <summary>
     /// Adds an image to the map for use in styling or layer configuration.
