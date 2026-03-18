@@ -1576,13 +1576,8 @@ export function setLayoutProperty(container, layerId, name, value) {
  * @param {string} container - The map container.
  * @param {string} sourceId - The source id
  */
-export function refreshTiles(container, sourceId ) {
-    if (tileIds === undefined || tileIds === null) {
-        mapInstances[container].refreshTiles(sourceId);
-    } else {
-        mapInstances[container].refreshTiles(sourceId, tileIds);
-    }
-
+export function refreshTiles(container, sourceId) {
+    mapInstances[container].refreshTiles(sourceId);
 }
 /**
  * Refreshes tiles in a specified source and tiles.
