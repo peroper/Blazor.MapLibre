@@ -18,7 +18,7 @@
       ]
     },
     {
-      "library": "terra-draw@1.18.0",
+      "library": "terra-draw@1.26.0",
       "destination": "wwwroot/terra-draw",
       "files": [ "dist/terra-draw.umd.js" ]
     },

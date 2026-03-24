@@ -179,6 +179,7 @@ export function addTerraDrawTool(container, options) {
         }
     });
     const polygonMode = new terraDraw.TerraDrawPolygonMode({
+        showCoordinatePoints: true,
         validation: (feature, { updateType }) => {
             if (updateType === "finish" || updateType === "commit") {
                 return terraDraw.ValidateNotSelfIntersecting(feature);
@@ -187,7 +188,7 @@ export function addTerraDrawTool(container, options) {
         }
     })
     const deleteMode = new TerraDrawCoordinateDeleteModeUmd();
-    drawControls[container] = new terraDraw.TerraDraw({adapter: adapter, modes: [new terraDraw.TerraDrawFreehandMode(), polygonMode, new terraDraw.TerraDrawLineStringMode(), select, new terraDraw.TerraDrawPointMode(), deleteMode]})
+    drawControls[container] = new terraDraw.TerraDraw({adapter: adapter, modes: [new terraDraw.TerraDrawFreehandMode(), polygonMode, new terraDraw.TerraDrawLineStringMode({ showCoordinatePoints: true }), select, new terraDraw.TerraDrawPointMode(), deleteMode]})
 }
 
 /**
@@ -210,6 +211,13 @@ export function stopTerraDraw(container) {
 export function setTerraDrawMode(container, mode) {
     const draw = drawControls[container];
     draw.start()
+
+    // Hide coordinate points in delete mode to avoid visual clutter
+    // with the delete mode's own point markers.
+    const showCoordinatePoints = mode !== 'delete';
+    draw.updateModeOptions('linestring', { showCoordinatePoints });
+    draw.updateModeOptions('polygon', { showCoordinatePoints });
+
     draw.setMode(mode);
 }
 
@@ -235,7 +243,19 @@ export function finishGeometry(container) {
 export function getTerraDrawGeometries(container)
 {
     const draw = drawControls[container];
-    return draw.getSnapshot();
+    return filterInternalFeatures(draw.getSnapshot());
+}
+
+/**
+ * Filter out internal helper features (coordinate points, closing points,
+ * snapping points) that Terra Draw adds to its store for rendering purposes.
+ */
+function filterInternalFeatures(features) {
+    return features.filter(f =>
+        !f.properties?.coordinatePoint &&
+        !f.properties?.closingPoint &&
+        !f.properties?.snappingPoint
+    );
 }
 
 export function onTerraDrawFinish(container, dotnetReference) {
@@ -243,7 +263,7 @@ export function onTerraDrawFinish(container, dotnetReference) {
 
     draw.on("finish", (id, context) => {
         if (context.action === "draw" || context.action === "dragCoordinate") {
-            const features = draw.getSnapshot();
+            const features = filterInternalFeatures(draw.getSnapshot());
             const featuresAsJson = JSON.stringify(features);
             dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
         }
@@ -255,7 +275,7 @@ export function onTerraDrawDelete(container, dotnetReference) {
 
     draw.on("change", (ids, type) => {
         if (type === "delete") {
-            const features = draw.getSnapshot();
+            const features = filterInternalFeatures(draw.getSnapshot());
             const featuresAsJson = JSON.stringify(features);
             dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
         }
@@ -266,7 +286,7 @@ export function onTerraDrawChange(container, dotnetReference, throttleTime = 100
     const draw = drawControls[container];
 
     const throttledInvoke = throttle(() => {
-        const features = draw.getSnapshot();
+        const features = filterInternalFeatures(draw.getSnapshot());
         const featuresAsJson = JSON.stringify(features);
         dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
     }, throttleTime);
