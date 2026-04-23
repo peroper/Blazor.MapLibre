@@ -248,13 +248,16 @@ export function getTerraDrawGeometries(container)
 
 /**
  * Filter out internal helper features (coordinate points, closing points,
- * snapping points) that Terra Draw adds to its store for rendering purposes.
+ * snapping points, midpoints, selection points) that Terra Draw adds to
+ * its store for rendering/editing purposes.
  */
 function filterInternalFeatures(features) {
     return features.filter(f =>
         !f.properties?.coordinatePoint &&
         !f.properties?.closingPoint &&
-        !f.properties?.snappingPoint
+        !f.properties?.snappingPoint &&
+        !f.properties?.midPoint &&
+        !f.properties?.selectionPoint
     );
 }
 
