@@ -267,11 +267,11 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     {
         return await _jsModule.InvokeAsync<object[]>("getTerraDrawGeometries", MapId);
     }
-    
+
     [JSInvokable] public Task OnTerraDrawReady() => Task.CompletedTask;
     [JSInvokable] public Task OnTerraDrawChanged(string geoJson) => Task.CompletedTask;
-    
-    
+
+
     public async Task<Listener> AddTerraDrawFinishListener<T>(Action<T> handler)
     {
         var callback = new CallbackHandler(_jsModule, "finish", handler, typeof(T));
@@ -282,7 +282,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
 
         return new Listener(callback);
     }
-    
+
     public async Task<Listener> AddTerraDrawDeleteListener<T>(Action<T> handler)
     {
         var callback = new CallbackHandler(_jsModule, "delete", handler, typeof(T));
@@ -304,7 +304,7 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
 
         return new Listener(callback);
     }
-    
+
     /// <summary>
     /// Adds a geolocate control to the given map container.
     /// </summary>
@@ -356,6 +356,14 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
         await _jsModule.InvokeVoidAsync("addScaleControl", MapId, options, position);
     }
 
+    /// <summary>
+    /// Updates the unit of the scale control.
+    /// </summary>
+    /// <param name="unit">The unit to set ("metric", "imperial", or "nautical").</param>
+    public async ValueTask SetScaleControlUnit(string unit)
+    {
+        await _jsModule.InvokeVoidAsync("setScaleControlUnit", MapId, unit);
+    }
 
     /// <summary>
     /// Adds an image to the map for use in styling or layer configuration.
@@ -1382,10 +1390,10 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
 
     public async Task CreateCurrentLocationMarker(MarkerOptions options, LngLat position)
         => await _jsModule.InvokeVoidAsync("createCurrentLocationMarker", MapId, options, position);
-    
+
     public async Task MoveCurrentLocationMarker(LngLat position)
         => await _jsModule.InvokeVoidAsync("moveCurrentLocationMarker", MapId, position);
-    
+
     public async Task RemoveCurrentLocationMarker()
         => await _jsModule.InvokeVoidAsync("removeCurrentLocationMarker", MapId);
 
@@ -1393,7 +1401,14 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
 
     public async ValueTask RefreshTiles(string sourceId, TileId[]? tileIds = null)
     {
-        await _jsModule.InvokeVoidAsync("refreshTiles", MapId, sourceId, tileIds);
+        if (tileIds is null)
+        {
+            await _jsModule.InvokeVoidAsync("refreshTiles", MapId, sourceId);
+        }
+        else
+        {
+            await _jsModule.InvokeVoidAsync("refreshTileIDs", MapId, sourceId, tileIds);
+        }
     }
 
     #region Bulk Transaction

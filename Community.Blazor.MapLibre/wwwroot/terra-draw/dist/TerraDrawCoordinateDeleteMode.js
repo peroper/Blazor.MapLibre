@@ -138,7 +138,8 @@ var TerraDrawCoordinateDeleteModeUmd = (function () {
         features.forEach(function(feature) {
             if (feature.properties.isDeletePoint ||
                 feature.properties.midPoint ||
-                feature.properties.selectionPoint) {
+                feature.properties.selectionPoint ||
+                feature.properties.coordinatePoint) {
                 return;
             }
             

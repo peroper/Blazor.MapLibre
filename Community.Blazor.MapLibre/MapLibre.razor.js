@@ -4,6 +4,7 @@ const mapInstances = {};
 const optionsInstances = {};
 const currentLocationMarkerInstances = {};
 const drawControls = {};
+const scaleControlInstances = {};
 /**
  * Cuts the GeoJSON source at the antimeridian if the option is enabled.
  *
@@ -178,6 +179,7 @@ export function addTerraDrawTool(container, options) {
         }
     });
     const polygonMode = new terraDraw.TerraDrawPolygonMode({
+        showCoordinatePoints: true,
         validation: (feature, { updateType }) => {
             if (updateType === "finish" || updateType === "commit") {
                 return terraDraw.ValidateNotSelfIntersecting(feature);
@@ -186,7 +188,7 @@ export function addTerraDrawTool(container, options) {
         }
     })
     const deleteMode = new TerraDrawCoordinateDeleteModeUmd();
-    drawControls[container] = new terraDraw.TerraDraw({adapter: adapter, modes: [new terraDraw.TerraDrawFreehandMode(), polygonMode, new terraDraw.TerraDrawLineStringMode(), select, new terraDraw.TerraDrawPointMode(), deleteMode]})
+    drawControls[container] = new terraDraw.TerraDraw({adapter: adapter, modes: [new terraDraw.TerraDrawFreehandMode(), polygonMode, new terraDraw.TerraDrawLineStringMode({ showCoordinatePoints: true }), select, new terraDraw.TerraDrawPointMode(), deleteMode]})
 }
 
 /**
@@ -209,6 +211,13 @@ export function stopTerraDraw(container) {
 export function setTerraDrawMode(container, mode) {
     const draw = drawControls[container];
     draw.start()
+
+    // Hide coordinate points in delete mode to avoid visual clutter
+    // with the delete mode's own point markers.
+    const showCoordinatePoints = mode !== 'delete';
+    draw.updateModeOptions('linestring', { showCoordinatePoints });
+    draw.updateModeOptions('polygon', { showCoordinatePoints });
+
     draw.setMode(mode);
 }
 
@@ -234,7 +243,22 @@ export function finishGeometry(container) {
 export function getTerraDrawGeometries(container)
 {
     const draw = drawControls[container];
-    return draw.getSnapshot();
+    return filterInternalFeatures(draw.getSnapshot());
+}
+
+/**
+ * Filter out internal helper features (coordinate points, closing points,
+ * snapping points, midpoints, selection points) that Terra Draw adds to
+ * its store for rendering/editing purposes.
+ */
+function filterInternalFeatures(features) {
+    return features.filter(f =>
+        !f.properties?.coordinatePoint &&
+        !f.properties?.closingPoint &&
+        !f.properties?.snappingPoint &&
+        !f.properties?.midPoint &&
+        !f.properties?.selectionPoint
+    );
 }
 
 export function onTerraDrawFinish(container, dotnetReference) {
@@ -242,7 +266,7 @@ export function onTerraDrawFinish(container, dotnetReference) {
 
     draw.on("finish", (id, context) => {
         if (context.action === "draw" || context.action === "dragCoordinate") {
-            const features = draw.getSnapshot();
+            const features = filterInternalFeatures(draw.getSnapshot());
             const featuresAsJson = JSON.stringify(features);
             dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
         }
@@ -254,7 +278,7 @@ export function onTerraDrawDelete(container, dotnetReference) {
 
     draw.on("change", (ids, type) => {
         if (type === "delete") {
-            const features = draw.getSnapshot();
+            const features = filterInternalFeatures(draw.getSnapshot());
             const featuresAsJson = JSON.stringify(features);
             dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
         }
@@ -265,7 +289,7 @@ export function onTerraDrawChange(container, dotnetReference, throttleTime = 100
     const draw = drawControls[container];
 
     const throttledInvoke = throttle(() => {
-        const features = draw.getSnapshot();
+        const features = filterInternalFeatures(draw.getSnapshot());
         const featuresAsJson = JSON.stringify(features);
         dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
     }, throttleTime);
@@ -308,10 +332,24 @@ export function addScaleControl(container, options, position) {
     const map = mapInstances[container];
     console.log("addScaleControl position: " + position);
 
-    if (options === undefined || options === null) {
-        map.addControl(new maplibregl.ScaleControl(), position || undefined);
-    } else {
-        map.addControl(new maplibregl.ScaleControl(options), position || undefined);
+    const scaleControl = (options === undefined || options === null)
+        ? new maplibregl.ScaleControl()
+        : new maplibregl.ScaleControl(options);
+
+    map.addControl(scaleControl, position || undefined);
+    scaleControlInstances[container] = scaleControl;
+}
+
+/**
+ * Updates the unit of the scale control for the given map container.
+ *
+ * @param {string} container - The identifier of the map container.
+ * @param {string} unit - The unit to set ("metric", "imperial", or "nautical").
+ */
+export function setScaleControlUnit(container, unit) {
+    const scaleControl = scaleControlInstances[container];
+    if (scaleControl) {
+        scaleControl.setUnit(unit);
     }
 }
 
@@ -1560,13 +1598,32 @@ export function setLayoutProperty(container, layerId, name, value) {
  * Refreshes tiles in a specified source.
  * @param {string} container - The map container.
  * @param {string} sourceId - The source id
+ */
+export function refreshTiles(container, sourceId) {
+    mapInstances[container].refreshTiles(sourceId);
+}
+/**
+ * Refreshes tiles in a specified source and tiles.
+ * @param {string} container - The map container.
+ * @param {string} sourceId - The source id
  * @param {Array<object>} tileIds - Tile id objects with { z, x, y }
  */
-export function refreshTiles(container, sourceId, tileIds) {
-    if (tileIds === undefined || tileIds === null) {
-        mapInstances[container].refreshTiles(sourceId);
-    } else {
-        mapInstances[container].refreshTiles(sourceId, tileIds);
-    }
+export function refreshTileIDs(container, sourceId, tileIds) {
+    const mapInstance = mapInstances[container];
+    const tileManager = mapInstance.style.tileManagers[sourceId];
 
+
+    for (const id of tileManager._inViewTiles.getAllIds()) {
+        const tile = tileManager._inViewTiles.getTileById(id);
+        const c = tile.tileID.canonical;
+
+        if (tileIds.some(t => t.z === c.z && t.x === c.x && t.y === c.y)) {
+            tileManager._reloadTile(id, 'expired');
+        }
+    }
+    tileManager._outOfViewCache.filter(tile =>
+        !tileIds.some(t => t.z === tile.tileID.canonical.z &&
+            t.x === tile.tileID.canonical.x &&
+            t.y === tile.tileID.canonical.y)
+    );
 }
