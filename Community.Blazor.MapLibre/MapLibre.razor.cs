@@ -294,6 +294,17 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
         return new Listener(callback);
     }
 
+    public async Task<Listener> AddTerraDrawChangeListener<T>(Action<T> handler)
+    {
+        var callback = new CallbackHandler(_jsModule, "change", handler, typeof(T));
+        var reference = DotNetObjectReference.Create(callback);
+        _references.TryAdd(Guid.NewGuid(), reference);
+
+        await _jsModule.InvokeVoidAsync("onTerraDrawChange", MapId, reference);
+
+        return new Listener(callback);
+    }
+    
     /// <summary>
     /// Adds a geolocate control to the given map container.
     /// </summary>
