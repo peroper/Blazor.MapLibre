@@ -2,6 +2,7 @@
 
 namespace Community.Blazor.MapLibre.Models.Feature;
 
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(FeatureCollection))]
 [JsonDerivedType(typeof(FeatureFeature))]
 public interface IFeature

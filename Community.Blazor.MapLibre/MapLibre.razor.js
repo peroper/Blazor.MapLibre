@@ -261,16 +261,40 @@ export function onTerraDrawDelete(container, dotnetReference) {
     });
 }
 
-export function onTerraDrawChange(container, dotnetReference) {
+export function onTerraDrawChange(container, dotnetReference, throttleTime = 100) {
     const draw = drawControls[container];
+
+    const throttledInvoke = throttle(() => {
+        const features = draw.getSnapshot();
+        const featuresAsJson = JSON.stringify(features);
+        dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
+    }, throttleTime);
 
     draw.on('change', (ids, type) => {
         if (type === 'create' || type === 'update' || type === 'delete') {
-            const features = draw.getSnapshot();
-            const featuresAsJson = JSON.stringify(features);
-            dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
+            throttledInvoke();
         }
     });
+}
+
+function throttle(func, intervalInMs) {
+    let lastFunc;
+    let lastRan;
+
+    return function(...args) {
+        if (!lastRan) {
+            func.apply(this, args);
+            lastRan = Date.now();
+        } else {
+            clearTimeout(lastFunc);
+            lastFunc = setTimeout(() => {
+                if ((Date.now() - lastRan) >= intervalInMs) {
+                    func.apply(this, args);
+                    lastRan = Date.now();
+                }
+            }, intervalInMs - (Date.now() - lastRan));
+        }
+    }
 }
 
 /**
