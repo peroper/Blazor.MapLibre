@@ -126,8 +126,6 @@ export function addGeolocateControl(container, options, position) {
 export function addNavigationControl(container, options, position) {
     const map = mapInstances[container];
 
-    console.log("addNavigationControl position: " + position);
-
     if (options === undefined || options === null) {
         map.addControl(new maplibregl.NavigationControl(), position || undefined);
     } else {
@@ -187,7 +185,8 @@ export function addTerraDrawTool(container, options) {
             return { valid: true }
         }
     })
-    drawControls[container] = new terraDraw.TerraDraw({adapter: adapter, modes: [new terraDraw.TerraDrawFreehandMode(), polygonMode, new terraDraw.TerraDrawLineStringMode(), select, new terraDraw.TerraDrawPointMode()]})
+    const deleteMode = new TerraDrawCoordinateDeleteModeUmd();
+    drawControls[container] = new terraDraw.TerraDraw({adapter: adapter, modes: [new terraDraw.TerraDrawFreehandMode(), polygonMode, new terraDraw.TerraDrawLineStringMode(), select, new terraDraw.TerraDrawPointMode(), deleteMode]})
 }
 
 /**
@@ -224,6 +223,42 @@ export function finishGeometry(container) {
     });
     const element = getCanvas(container)
     element.dispatchEvent(event);
+}
+
+/**
+ * Get created geometries from terra-draw.
+ *
+ * @param {string} container - The identifier of the map container.
+ * @returns {Array} geometries - The created geometries.
+ */
+export function getTerraDrawGeometries(container)
+{
+    const draw = drawControls[container];
+    return draw.getSnapshot();
+}
+
+export function onTerraDrawFinish(container, dotnetReference) {
+    const draw = drawControls[container];
+
+    draw.on("finish", (id, context) => {
+        if (context.action === "draw" || context.action === "dragCoordinate") {
+            const features = draw.getSnapshot();
+            const featuresAsJson = JSON.stringify(features);
+            dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
+        }
+    });
+}
+
+export function onTerraDrawDelete(container, dotnetReference) {
+    const draw = drawControls[container];
+
+    draw.on("change", (ids, type) => {
+        if (type === "delete") {
+            const features = draw.getSnapshot();
+            const featuresAsJson = JSON.stringify(features);
+            dotnetReference.invokeMethodAsync('Invoke', featuresAsJson);
+        }
+    });
 }
 
 /**
