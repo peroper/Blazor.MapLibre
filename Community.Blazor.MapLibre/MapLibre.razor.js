@@ -4,6 +4,7 @@ const mapInstances = {};
 const optionsInstances = {};
 const currentLocationMarkerInstances = {};
 const drawControls = {};
+const scaleControlInstances = {};
 /**
  * Cuts the GeoJSON source at the antimeridian if the option is enabled.
  *
@@ -308,10 +309,24 @@ export function addScaleControl(container, options, position) {
     const map = mapInstances[container];
     console.log("addScaleControl position: " + position);
 
-    if (options === undefined || options === null) {
-        map.addControl(new maplibregl.ScaleControl(), position || undefined);
-    } else {
-        map.addControl(new maplibregl.ScaleControl(options), position || undefined);
+    const scaleControl = (options === undefined || options === null)
+        ? new maplibregl.ScaleControl()
+        : new maplibregl.ScaleControl(options);
+
+    map.addControl(scaleControl, position || undefined);
+    scaleControlInstances[container] = scaleControl;
+}
+
+/**
+ * Updates the unit of the scale control for the given map container.
+ *
+ * @param {string} container - The identifier of the map container.
+ * @param {string} unit - The unit to set ("metric", "imperial", or "nautical").
+ */
+export function setScaleControlUnit(container, unit) {
+    const scaleControl = scaleControlInstances[container];
+    if (scaleControl) {
+        scaleControl.setUnit(unit);
     }
 }
 
