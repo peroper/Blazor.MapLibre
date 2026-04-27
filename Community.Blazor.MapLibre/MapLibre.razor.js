@@ -1334,7 +1334,9 @@ export function setGlobalStateProperty(container, propertyName, value) {
  * @param {object} [options] - Filter options.
  */
 export function setFilter(container, layerId, filter, options) {
-    mapInstances[container].setFilter(layerId, filter, options);
+    const map = mapInstances[container];
+    if (!map.getLayer(layerId)) return;
+    map.setFilter(layerId, filter, options);
 }
 
 /**
