@@ -209,16 +209,32 @@ export function stopTerraDraw(container) {
  * @param {Object} mode - Terra-draw mode to start.
  */
 export function setTerraDrawMode(container, mode) {
-    const draw = drawControls[container];
-    draw.start()
+    try {
+        const draw = drawControls[container];
+        if (!draw._enabled) {
+            draw.start();
+        }
 
-    // Hide coordinate points in delete mode to avoid visual clutter
-    // with the delete mode's own point markers.
-    const showCoordinatePoints = mode !== 'delete';
-    draw.updateModeOptions('linestring', { showCoordinatePoints });
-    draw.updateModeOptions('polygon', { showCoordinatePoints });
+        // Enable coordinate points on the target drawing mode while it is
+        // still inactive — mutating an active mode's showCoordinatePoints
+        // corrupts its state.
+        if (mode === 'linestring' || mode === 'polygon') {
+            draw.updateModeOptions(mode, { showCoordinatePoints: true });
+        }
 
-    draw.setMode(mode);
+        draw.setMode(mode);
+
+        // Disable coordinate points on any drawing mode that is no longer
+        // active so they don't interfere with select/delete mode UI.
+        for (const drawingMode of ['linestring', 'polygon']) {
+            if (drawingMode !== mode) {
+                draw.updateModeOptions(drawingMode, { showCoordinatePoints: false });
+            }
+        }
+    } catch (e) {
+        console.error('[setTerraDrawMode] Failed to set mode', mode, e);
+        throw e;
+    }
 }
 
 /**
