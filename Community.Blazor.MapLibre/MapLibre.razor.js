@@ -4,6 +4,7 @@ const mapInstances = {};
 const optionsInstances = {};
 const currentLocationMarkerInstances = {};
 const drawControls = {};
+const editedFeatureIds = {};
 const scaleControlInstances = {};
 /**
  * Cuts the GeoJSON source at the antimeridian if the option is enabled.
@@ -199,7 +200,8 @@ export function addTerraDrawTool(container, options) {
 export function stopTerraDraw(container) {
     const draw = drawControls[container];
     draw.setMode("static");
-    draw.stop()
+    draw.stop();
+    delete editedFeatureIds[container];
 }
 
 /**
@@ -238,6 +240,63 @@ export function setTerraDrawMode(container, mode) {
 }
 
 /**
+ * Add a pre-existing feature into terra-draw's store and put the tool into
+ * select mode so the user can edit the feature's coordinates.
+ *
+ * @param {string} container - The identifier of the map container.
+ * @param {string} featureJson - GeoJSON Feature serialized as a string.
+ * @param {string} mode - The terra-draw mode name ("point" | "linestring" | "polygon").
+ */
+export function editTerraDrawFeature(container, featureJson, mode) {
+    const draw = drawControls[container];
+    if (!draw) {
+        console.error('[editTerraDrawFeature] terra-draw not initialised for container', container);
+        return;
+    }
+    if (!draw._enabled) {
+        draw.start();
+    }
+
+    const feature = JSON.parse(featureJson);
+    feature.type = "Feature";
+    feature.properties = feature.properties || {};
+    feature.properties.mode = mode;
+
+    if (mode === 'linestring' || mode === 'polygon') {
+        draw.updateModeOptions(mode, { showCoordinatePoints: true });
+    }
+    for (const drawingMode of ['linestring', 'polygon']) {
+        if (drawingMode !== mode) {
+            draw.updateModeOptions(drawingMode, { showCoordinatePoints: false });
+        }
+    }
+
+    let result;
+    try {
+        result = draw.addFeatures([feature]);
+    } catch (e) {
+        console.error('[editTerraDrawFeature] addFeatures threw', e, feature);
+        return;
+    }
+
+    const entry = Array.isArray(result) ? result[0] : null;
+    if (entry && entry.valid === false) {
+        console.error('[editTerraDrawFeature] terra-draw rejected feature:', entry.reason, feature);
+        return;
+    }
+
+    draw.setMode('select');
+
+    const id = entry?.id;
+    if (id != null) {
+        editedFeatureIds[container] = id;
+        if (typeof draw.selectFeature === 'function') {
+            try { draw.selectFeature(id); } catch (e) { /* selection is best-effort */ }
+        }
+    }
+}
+
+/**
  * Finish the geometry currently being edited.
  *
  * @param {string} container - The identifier of the map container.
@@ -259,7 +318,12 @@ export function finishGeometry(container) {
 export function getTerraDrawGeometries(container)
 {
     const draw = drawControls[container];
-    return filterInternalFeatures(draw.getSnapshot());
+    const all = draw.getSnapshot();
+    const editedId = editedFeatureIds[container];
+    if (editedId != null) {
+        return all.filter(f => f.id === editedId);
+    }
+    return filterInternalFeatures(all);
 }
 
 /**
