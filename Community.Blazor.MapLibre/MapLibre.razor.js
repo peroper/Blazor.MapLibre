@@ -217,6 +217,10 @@ export function setTerraDrawMode(container, mode) {
             draw.start();
         }
 
+        if (mode !== 'select' && editedFeatureIds[container] != null) {
+            delete editedFeatureIds[container];
+        }
+
         // Enable coordinate points on the target drawing mode while it is
         // still inactive — mutating an active mode's showCoordinatePoints
         // corrupts its state.
@@ -255,6 +259,12 @@ export function editTerraDrawFeature(container, featureJson, mode) {
     }
     if (!draw._enabled) {
         draw.start();
+    }
+
+    const prevId = editedFeatureIds[container];
+    if (prevId != null) {
+        try { draw.removeFeatures([prevId]); } catch (e) { /* best-effort */ }
+        delete editedFeatureIds[container];
     }
 
     const feature = JSON.parse(featureJson);
