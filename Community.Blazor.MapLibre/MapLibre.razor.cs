@@ -248,6 +248,24 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     }
 
     /// <summary>
+    /// Seed terra-draw with an existing GeoJSON feature and switch into select
+    /// mode so the user can edit its coordinates.
+    /// </summary>
+    /// <remarks>
+    /// While this edit session is active, <see cref="GetTerraDrawGeometriesAsync"/>
+    /// returns only the seeded feature. The session ends when the user switches to
+    /// a non-select mode (e.g. via the drawing toolbar) or when <see cref="StopTerraDrawAsync"/>
+    /// is called. Calling <c>EditTerraDrawFeatureAsync</c> again replaces the
+    /// previously seeded feature in terra-draw's store.
+    /// </remarks>
+    /// <param name="featureJson">GeoJSON Feature serialized as JSON.</param>
+    /// <param name="mode">Terra-draw mode of the feature ("point" | "linestring" | "polygon").</param>
+    public async Task EditTerraDrawFeatureAsync(string featureJson, string mode)
+    {
+        await _jsModule.InvokeVoidAsync("editTerraDrawFeature", MapId, featureJson, mode);
+    }
+
+    /// <summary>
     /// Finish / Close the geometry being edited (simulates enter-key event)
     /// </summary>
     public async Task FinishGeometryAsync()
