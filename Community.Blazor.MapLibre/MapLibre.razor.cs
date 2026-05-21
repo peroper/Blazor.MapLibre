@@ -1384,6 +1384,24 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     }
 
     /// <summary>
+    /// Disables double-click/double-tap zoom and tap-then-drag-vertical zoom.
+    /// Use while editing geometries with terra-draw so those gestures do not
+    /// conflict with vertex dragging. Pinch and scroll-wheel zoom remain enabled.
+    /// </summary>
+    public async ValueTask DisableMapZoomGesturesAsync()
+    {
+        await _jsModule.InvokeVoidAsync("disableMapZoomGestures", MapId);
+    }
+
+    /// <summary>
+    /// Re-enables the zoom gestures disabled by <see cref="DisableMapZoomGesturesAsync"/>.
+    /// </summary>
+    public async ValueTask EnableMapZoomGesturesAsync()
+    {
+        await _jsModule.InvokeVoidAsync("enableMapZoomGestures", MapId);
+    }
+
+    /// <summary>
     /// Sets the value of a layout property in the specified style layer.
     /// </summary>
     public async ValueTask SetLayoutProperty(string layerId, string name, string value)
