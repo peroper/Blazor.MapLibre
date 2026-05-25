@@ -1682,6 +1682,32 @@ export function disableRotation(container) {
     mapInstances[container].keyboard.disableRotation();
 }
 
+/**
+ * Disables map zoom gestures that conflict with terra-draw point editing:
+ * double-click / double-tap zoom, and tap-then-drag-vertical zoom.
+ * Pinch-to-zoom and scroll-wheel zoom remain enabled.
+ * @param {string} container - The map container.
+ */
+export function disableMapZoomGestures(container) {
+    const map = mapInstances[container];
+    if (!map) return;
+    map.doubleClickZoom.disable();
+    // _tapDragZoom is an internal handler inside touchZoomRotate; there is no
+    // public API to toggle it independently of pinch-zoom.
+    map.touchZoomRotate?._tapDragZoom?.disable?.();
+}
+
+/**
+ * Re-enables map zoom gestures previously disabled by disableMapZoomGestures.
+ * @param {string} container - The map container.
+ */
+export function enableMapZoomGestures(container) {
+    const map = mapInstances[container];
+    if (!map) return;
+    map.doubleClickZoom.enable();
+    map.touchZoomRotate?._tapDragZoom?.enable?.();
+}
+
 export function setLayoutProperty(container, layerId, name, value) {
     mapInstances[container].setLayoutProperty(layerId, name, value);
 }
