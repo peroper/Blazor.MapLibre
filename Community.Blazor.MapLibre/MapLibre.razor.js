@@ -144,7 +144,10 @@ export function addNavigationControl(container, options, position) {
  */
 export function addTerraDrawTool(container, options) {
     const map = mapInstances[container];
-    // TODO: Make configurable via options
+    const singleFeature = options?.singleFeature === true;
+    // -1 disables close-on-click. 0 doesn't work — terra-draw 1.26 gates the
+    // option with `if (options?.pointerDistance)` and falls back to the default.
+    const drawModeOpts = singleFeature ? { pointerDistance: -1 } : {};
     var adapter = new terraDrawMaplibreGlAdapter.TerraDrawMapLibreGLAdapter({ map })
     var select = new terraDraw.TerraDrawSelectMode({
         flags: {
@@ -181,6 +184,7 @@ export function addTerraDrawTool(container, options) {
     });
     const polygonMode = new terraDraw.TerraDrawPolygonMode({
         showCoordinatePoints: true,
+        ...drawModeOpts,
         validation: (feature, { updateType }) => {
             if (updateType === "finish" || updateType === "commit") {
                 return terraDraw.ValidateNotSelfIntersecting(feature);
@@ -188,8 +192,12 @@ export function addTerraDrawTool(container, options) {
             return { valid: true }
         }
     })
+    const lineStringMode = new terraDraw.TerraDrawLineStringMode({
+        showCoordinatePoints: true,
+        ...drawModeOpts
+    });
     const deleteMode = new TerraDrawCoordinateDeleteModeUmd();
-    drawControls[container] = new terraDraw.TerraDraw({adapter: adapter, modes: [new terraDraw.TerraDrawFreehandMode(), polygonMode, new terraDraw.TerraDrawLineStringMode({ showCoordinatePoints: true }), select, new terraDraw.TerraDrawPointMode(), deleteMode]})
+    drawControls[container] = new terraDraw.TerraDraw({adapter: adapter, modes: [new terraDraw.TerraDrawFreehandMode(), polygonMode, lineStringMode, select, new terraDraw.TerraDrawPointMode(), deleteMode]});
 }
 
 /**

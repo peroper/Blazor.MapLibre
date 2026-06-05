@@ -221,14 +221,19 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
     /// <summary>
     /// Add a terra-draw instance for drawing geometries
     /// </summary>
-    public async Task AddTerraDrawToolAsync()
+    /// <param name="singleFeature">
+    /// When <c>true</c>, clicking the first/last coordinate no longer closes
+    /// the geometry — commit explicitly via <see cref="FinishGeometryAsync"/>.
+    /// </param>
+    public async Task AddTerraDrawToolAsync(bool singleFeature = false)
     {
+        var options = new { singleFeature };
         if (_bulkTransaction is not null)
         {
-            _bulkTransaction.Add("addTerraDrawTool");
+            _bulkTransaction.Add("addTerraDrawTool", options);
             return;
         }
-        await _jsModule.InvokeVoidAsync("addTerraDrawTool", MapId);
+        await _jsModule.InvokeVoidAsync("addTerraDrawTool", MapId, options);
     }
 
     /// <summary>
