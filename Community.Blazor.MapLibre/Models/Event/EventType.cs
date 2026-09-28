@@ -32,5 +32,8 @@ public enum EventType
     MouseOver,
 
     [JsonStringEnumMemberName("mouseup")]
-    MouseUp
+    MouseUp,
+
+    [JsonStringEnumMemberName("touchstart")]
+    TouchStart
 }
