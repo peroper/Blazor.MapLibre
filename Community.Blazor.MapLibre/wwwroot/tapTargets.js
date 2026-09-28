@@ -154,7 +154,7 @@ function screenBoxesAround(map, point, { reachTolerance, smallAreaSize }, queryO
 function distinctFeatures(features) {
     const seen = new Set();
     return features.filter(feature => {
-        if (feature.properties?.id === undefined || feature.properties?.id === null) return true;
+        if (identityOf(feature) === undefined) return true;
         if (seen.has(keyOf(feature))) return false;
 
         seen.add(keyOf(feature));
@@ -162,6 +162,11 @@ function distinctFeatures(features) {
     });
 }
 
+// Some layers have no id, only the table key ogc_fid.
+function identityOf(feature) {
+    return feature.properties?.id ?? feature.properties?.ogc_fid ?? undefined;
+}
+
 function keyOf(feature) {
-    return `${feature.layer?.id}/${feature.properties?.id ?? JSON.stringify(feature.properties)}`;
+    return `${feature.layer?.id}/${identityOf(feature) ?? JSON.stringify(feature.properties)}`;
 }

@@ -244,6 +244,26 @@ test('on the map, a feature listed once per tile is one choice', () => {
     assertIds(tapOnMap([point(), point()], { x: 0, y: 0 }), ['windthrow']);
 });
 
+test('on the map, a point without an id listed once per tile is one choice', () => {
+    const point = () => ({ ...mapFeature(null, 'sks_skoghistoriapunkt', 'circle', null, undefined, [2, 0]), properties: { ogc_fid: 9 } });
+
+    assert.equal(tapOnMap([point(), point()], { x: 0, y: 0 }).length, 1);
+});
+
+test('on the map, a tap on a tile border in an area without an id is one choice', () => {
+    const pieces = [ring(-400, -400, 0, 400), ring(0, -400, 400, 400)]
+        .map(piece => ({ ...mapFeature(null, 'sks_sumpskog', 'fill', [piece]), properties: { ogc_fid: 7 } }));
+
+    assert.equal(tapOnMap(pieces, { x: 0, y: 0 }).length, 1);
+});
+
+test('on the map, features without an id share an ogc_fid only within their own layer', () => {
+    const swamp = { ...mapFeature(null, 'sks_sumpskog', 'fill', [ring(-400, -400, 400, 400)]), properties: { ogc_fid: 7 } };
+    const biotope = { ...mapFeature(null, 'sks_nyckelbiotop', 'fill', [ring(-400, -400, 400, 400)]), properties: { ogc_fid: 7 } };
+
+    assert.equal(tapOnMap([swamp, biotope], { x: 0, y: 0 }).length, 2);
+});
+
 test('on the map, the winners come back without geometries', () => {
     const [target] = tapOnMap([mapFeature('windthrow', 'observationQuery', 'circle', null, undefined, [2, 0])], { x: 0, y: 0 });
 
