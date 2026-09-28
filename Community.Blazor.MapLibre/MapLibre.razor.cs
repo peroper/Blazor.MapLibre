@@ -1022,6 +1022,13 @@ public partial class MapLibre : ComponentBase, IAsyncDisposable
         await _jsModule.InvokeAsync<object[]>("queryRenderedFeaturesWithoutGeometriesReturned", MapId, query, options);
 
     /// <summary>
+    /// Finds what a tap is about: a point before a line, a line before an area, a small area before a
+    /// larger one. Returns one feature to open or several to choose between, without geometries.
+    /// </summary>
+    public async ValueTask<object[]> QueryTapTargets(PointLike point, TapTargetOptions options) =>
+        await _jsModule.InvokeAsync<object[]>("queryTapTargets", MapId, point, options);
+
+    /// <summary>
     /// Returns an array of <see cref="SimpleFeature"/> objects representing features within the specified vector tile or GeoJSON source that satisfy the query parameters.
     /// </summary>
     /// <param name="sourceId">

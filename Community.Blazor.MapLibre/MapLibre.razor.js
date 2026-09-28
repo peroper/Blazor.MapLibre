@@ -1,4 +1,4 @@
-
+import { queryIntersectingFeatures, queryTapTargetsOnMap } from './tapTargets.js';
 
 const mapInstances = {};
 const optionsInstances = {};
@@ -1200,25 +1200,24 @@ export function queryRenderedFeatures(container, query, options) {
 }
 
 export function queryRenderedFeaturesWithoutGeometriesReturned(container, query, options) {
-    const upperLeft = mapInstances[container].unproject([query[0][0], query[0][1]]);
-    const bottomRight = mapInstances[container].unproject([query[1][0], query[1][1]]);
-
-    const bboxPolygon = turf.bboxPolygon([
-        upperLeft.lng,
-        bottomRight.lat,
-        bottomRight.lng,
-        upperLeft.lat
-    ]);
-    const features = mapInstances[container].queryRenderedFeatures(query, options);
-
-    const intersectingFeatures = features.filter(feature =>
-        turf.booleanIntersects(feature.geometry, bboxPolygon.geometry)
-    );
+    const intersectingFeatures = queryIntersectingFeatures(mapInstances[container], query, options);
 
     for (const feature of intersectingFeatures) {
         feature.geometry = null;
     }
     return intersectingFeatures;
+}
+
+/**
+ * Finds what a tap at a point is about, without geometries: one feature to open, or several to choose
+ * between. See tapTargets.js for the ranking.
+ * @param {string} container - The map container.
+ * @param {object} point - The tapped pixel, {x, y}.
+ * @param {object} options - {layers, reachTolerance, underFingerTolerance, smallAreaSize}.
+ * @returns {Array} Query results.
+ */
+export function queryTapTargets(container, point, options) {
+    return queryTapTargetsOnMap(mapInstances[container], point, options);
 }
 
 /**
