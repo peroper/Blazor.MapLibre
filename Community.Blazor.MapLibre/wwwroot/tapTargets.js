@@ -171,9 +171,9 @@ function distinctFeatures(features) {
     });
 }
 
-// Some layers have no id, only the table key ogc_fid.
+// Some layers have no id, only the table key ogc_fid, and some only MapLibre's feature id.
 function identityOf(feature) {
-    return feature.properties?.id ?? feature.properties?.ogc_fid ?? undefined;
+    return feature.properties?.id ?? feature.properties?.ogc_fid ?? feature.id ?? undefined;
 }
 
 function keyOf(feature) {

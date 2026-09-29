@@ -256,6 +256,12 @@ test('on the map, a feature listed once per tile is one choice', () => {
     assertIds(tapOnMap([point(), point()], { x: 0, y: 0 }), ['windthrow']);
 });
 
+test('on the map, a point with only a MapLibre id listed once per tile is one choice', () => {
+    const point = () => ({ ...mapFeature(null, 'observationQuery', 'circle', null, undefined, [2, 0]), id: 42, properties: {} });
+
+    assert.equal(tapOnMap([point(), point()], { x: 0, y: 0 }).length, 1);
+});
+
 test('on the map, a point without an id listed once per tile is one choice', () => {
     const point = () => ({ ...mapFeature(null, 'sks_skoghistoriapunkt', 'circle', null, undefined, [2, 0]), properties: { ogc_fid: 9 } });
 
