@@ -5,6 +5,10 @@ namespace Community.Blazor.MapLibre.Models;
 /// <summary>Options for <see cref="MapLibre.QueryTapTargets"/>, in screen pixels.</summary>
 public class TapTargetOptions
 {
+    /// <summary>
+    /// The layers to hit. Give an area by its fill layer, not the line layer of its outline: an outline
+    /// counts as a line and wins over the area under the finger.
+    /// </summary>
     [JsonPropertyName("layers")]
     public required IEnumerable<string> Layers { get; set; }
 
