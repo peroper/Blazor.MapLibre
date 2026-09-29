@@ -217,6 +217,18 @@ test('of two small areas under the finger, a smaller one drawn under a visible o
         feature('monument', 'raa_lamningar_polygon', 'fill', rect(-5, -5, 5, 5))), ['swamp', 'monument']);
 });
 
+test('a small area drawn under a larger visible area asks which one', () => {
+    assertIds(resolve(reserve(everywhere), biotope(rect(-20, -20, 20, 20))), ['reserve', 'biotope']);
+});
+
+test('a small area beside the finger drawn under a larger visible area asks which one', () => {
+    assertIds(resolve(reserve(everywhere), biotope(rect(12, -8, 28, 8))), ['reserve', 'biotope']);
+});
+
+test('a small area drawn on top of a larger visible area wins over it', () => {
+    assertIds(resolve(biotope(rect(-20, -20, 20, 20)), reserve(everywhere)), ['biotope']);
+});
+
 test('the reach is a square around the tap', () => {
     assertIds(resolve(observation('windthrow', 22, 22), compartment('9', everywhere)), ['windthrow']);
     assertIds(resolve(observation('windthrow', 23, 0), compartment('9', everywhere)), ['9']);
@@ -235,7 +247,7 @@ test('on the map, an area cut into tile pieces is measured as a whole', () => {
         .map(piece => mapFeature('wetland', 'sks_sumpskog', 'fill', [piece]));
     const monument = mapFeature('monument', 'raa_lamningar_polygon', 'fill', [ring(40, -5, 50, 5)]);
 
-    assertIds(tapOnMap([...pieces, monument], { x: 30, y: 0 }), ['monument']);
+    assertIds(tapOnMap([monument, ...pieces], { x: 30, y: 0 }), ['monument']);
 });
 
 test('on the map, a feature listed once per tile is one choice', () => {

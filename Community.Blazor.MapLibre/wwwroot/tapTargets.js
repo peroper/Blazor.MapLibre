@@ -67,13 +67,18 @@ export function resolveTapTargets(queryAround, options = {}) {
     const reachable = ofKind(withinReach, kind);
 
     if (kind === Kind.smallArea) {
-        const underFinger = ofKind(queryAround(0, 0, areaTolerance), kind).map((feature, drawOrder) => {
+        const drawOrderOf = feature => withinReach.findIndex(other => keyOf(other) === keyOf(feature));
+        const underFingerAreas = queryAround(0, 0, areaTolerance);
+        const underFinger = ofKind(underFingerAreas, kind).map(feature => {
             const [width, height] = sizeOf(feature);
-            return { feature, drawOrder, size: width * height };
+            return { feature, drawOrder: drawOrderOf(feature), size: width * height };
         });
-        return underFinger.length === 0
+        const winners = underFinger.length === 0
             ? reachable
             : withoutOutranked(underFinger, (area, other) => area.size < other.size);
+        const coveringWinner = ofKind(underFingerAreas, Kind.area).filter(area => !isTransparent(area) &&
+            winners.some(winner => drawOrderOf(area) < drawOrderOf(winner)));
+        return [...coveringWinner, ...winners].sort((a, b) => drawOrderOf(a) - drawOrderOf(b));
     }
 
     const underFinger = ofKind(queryAround(0, 0, underFingerTolerance), kind);
@@ -108,7 +113,11 @@ function withoutOutranked(areas, isSmaller) {
 
 // A transparent layer, like one that only exists to be tapped, hides nothing under it.
 function isOnTopOf(area, other) {
-    return area.drawOrder < other.drawOrder || other.feature.layer?.paint?.['fill-opacity'] === 0;
+    return area.drawOrder < other.drawOrder || isTransparent(other.feature);
+}
+
+function isTransparent(feature) {
+    return feature.layer?.paint?.['fill-opacity'] === 0;
 }
 
 function kindOfFeature(feature, { sizeOf, smallAreaSize }) {
