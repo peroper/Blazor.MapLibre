@@ -1,4 +1,4 @@
-// Run with: node --test tests/*.test.mjs
+// Run with: node --test tests/*.test.mjs, after a dotnet build has fetched turf with LibMan.
 //
 // Fakes in screen pixels with the tap at (0, 0): points are positions, lines and areas rectangles.
 // A query returns what its box touches in the order given, which stands for the draw order.
