@@ -225,6 +225,16 @@ test('a small area beside the finger drawn under a larger visible area asks whic
     assertIds(resolve(reserve(everywhere), biotope(rect(12, -8, 28, 8))), ['reserve', 'biotope']);
 });
 
+test('a small area beside the finger outside a visible area that ends at the finger wins', () => {
+    assertIds(resolve(
+        reserve(rect(-1000, -1000, 2, 1000)),
+        feature('monument', 'raa_lamningar_polygon', 'fill', rect(12, -8, 28, 8))), ['monument']);
+});
+
+test('a small area under the finger drawn under a visible area that ends before its middle asks which one', () => {
+    assertIds(resolve(reserve(rect(-1000, -1000, 5, 1000)), biotope(rect(-4, -8, 36, 8))), ['reserve', 'biotope']);
+});
+
 test('a small area drawn on top of a larger visible area wins over it', () => {
     assertIds(resolve(biotope(rect(-20, -20, 20, 20)), reserve(everywhere)), ['biotope']);
 });
@@ -247,7 +257,15 @@ test('on the map, an area cut into tile pieces is measured as a whole', () => {
         .map(piece => mapFeature('wetland', 'sks_sumpskog', 'fill', [piece]));
     const monument = mapFeature('monument', 'raa_lamningar_polygon', 'fill', [ring(40, -5, 50, 5)]);
 
-    assertIds(tapOnMap([monument, ...pieces], { x: 30, y: 0 }), ['monument']);
+    assertIds(tapOnMap([...pieces, monument], { x: 30, y: 0 }), ['monument']);
+});
+
+test('on the map, a small area beside the finger that misses its own middle asks which one under a visible area', () => {
+    const reserve = mapFeature('reserve', 'nvr_naturreservat', 'fill', [ring(-400, -400, 400, 400)]);
+    const monument = mapFeature('monument', 'raa_lamningar_polygon', 'fill',
+        [[[12, 8], [28, 8], [28, 4], [16, 4], [16, -8], [12, -8], [12, 8]]]);
+
+    assertIds(tapOnMap([reserve, monument], { x: 0, y: 0 }), ['reserve', 'monument']);
 });
 
 test('on the map, a feature listed once per tile is one choice', () => {
@@ -326,9 +344,9 @@ function resolve(...fakes) {
 function helpersOver(fakes) {
     const shapeOf = feature => fakes.find(fake => fake.feature === feature).shape;
     return {
-        sizeOf: feature => {
-            const shape = shapeOf(feature);
-            return [shape.maxX - shape.minX, shape.maxY - shape.minY];
+        boxOf: feature => {
+            const { minX, minY, maxX, maxY } = shapeOf(feature);
+            return [minX, minY, maxX, maxY];
         }
     };
 }

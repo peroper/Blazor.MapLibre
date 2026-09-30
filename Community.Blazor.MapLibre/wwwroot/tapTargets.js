@@ -24,12 +24,12 @@ export function queryTapTargetsOnMap(map, point, options) {
     ], queryOptions));
 
     const boxes = screenBoxesAround(map, point, { ...defaultTapOptions, ...options }, queryOptions);
-    const sizeOf = feature => {
+    const boxOf = feature => {
         const box = boxes.get(keyOf(feature));
-        return box && [box[2] - box[0], box[3] - box[1]];
+        return box && [box[0] - point.x, box[1] - point.y, box[2] - point.x, box[3] - point.y];
     };
 
-    const targets = resolveTapTargets(queryAround, { ...options, sizeOf });
+    const targets = resolveTapTargets(queryAround, { ...options, boxOf });
     for (const feature of targets) {
         feature.geometry = null;
     }
@@ -46,10 +46,13 @@ export function queryIntersectingFeatures(map, query, options) {
         .filter(feature => turf.booleanIntersects(feature.geometry, bboxPolygon.geometry));
 }
 
-/** `queryAround(dx, dy, tolerance)` returns the features within `tolerance` px of the tap moved by (dx, dy), topmost first. */
+/**
+ * `queryAround(dx, dy, tolerance)` returns the features within `tolerance` px of the tap moved by (dx, dy), topmost first.
+ * `boxOf(feature)` returns its box on screen as [minX, minY, maxX, maxY], relative to the tap.
+ */
 export function resolveTapTargets(queryAround, options = {}) {
     const settings = { ...defaultTapOptions, ...options };
-    const { reachTolerance, underFingerTolerance, sizeOf } = settings;
+    const { reachTolerance, underFingerTolerance, boxOf } = settings;
     const kindOf = feature => kindOfFeature(feature, settings);
     const ofKind = (features, kind) => features.filter(feature => kindOf(feature) === kind);
 
@@ -69,15 +72,24 @@ export function resolveTapTargets(queryAround, options = {}) {
     if (kind === Kind.smallArea) {
         const drawOrderOf = feature => withinReach.findIndex(other => keyOf(other) === keyOf(feature));
         const underFingerAreas = queryAround(0, 0, areaTolerance);
+        // A winner beside the finger is hidden only by an area also found at its middle. If the winner
+        // is found neither there nor under the finger, asking is never wrong.
+        const isFoundWith = (area, winner) => {
+            const [minX, minY, maxX, maxY] = boxOf(winner);
+            const spots = [[0, 0], [(minX + maxX) / 2, (minY + maxY) / 2]]
+                .map(([dx, dy]) => queryAround(dx, dy, areaTolerance).map(keyOf))
+                .filter(keys => keys.includes(keyOf(winner)));
+            return spots.length === 0 || spots.some(keys => keys.includes(keyOf(area)));
+        };
         const underFinger = ofKind(underFingerAreas, kind).map(feature => {
-            const [width, height] = sizeOf(feature);
+            const [width, height] = sizeOf(boxOf(feature));
             return { feature, drawOrder: drawOrderOf(feature), size: width * height };
         });
         const winners = underFinger.length === 0
             ? reachable
             : withoutOutranked(underFinger, (area, other) => area.size < other.size);
         const coveringWinner = ofKind(underFingerAreas, Kind.area).filter(area => !isTransparent(area) &&
-            winners.some(winner => drawOrderOf(area) < drawOrderOf(winner)));
+            winners.some(winner => drawOrderOf(area) < drawOrderOf(winner) && isFoundWith(area, winner)));
         return [...coveringWinner, ...winners].sort((a, b) => drawOrderOf(a) - drawOrderOf(b));
     }
 
@@ -120,7 +132,7 @@ function isTransparent(feature) {
     return feature.layer?.paint?.['fill-opacity'] === 0;
 }
 
-function kindOfFeature(feature, { sizeOf, smallAreaSize }) {
+function kindOfFeature(feature, { boxOf, smallAreaSize }) {
     switch (feature.layer?.type) {
         case 'circle':
         case 'symbol':
@@ -129,10 +141,14 @@ function kindOfFeature(feature, { sizeOf, smallAreaSize }) {
         case 'line':
             return Kind.line;
         default: {
-            const size = sizeOf?.(feature);
+            const size = sizeOf(boxOf?.(feature));
             return size && size[0] <= smallAreaSize && size[1] <= smallAreaSize ? Kind.smallArea : Kind.area;
         }
     }
+}
+
+function sizeOf(box) {
+    return box && [box[2] - box[0], box[3] - box[1]];
 }
 
 // Each feature's box on screen, over all its tile pieces. An area that is small near the tap lies whole
