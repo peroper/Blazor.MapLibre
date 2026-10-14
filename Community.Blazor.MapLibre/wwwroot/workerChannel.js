@@ -6,7 +6,7 @@
 // through a real channel, but if it hasn't arrived within fallbackMs the handler runs anyway and
 // the channel is replaced.
 
-const fallbackMs = 50;
+const workerFallbackMs = 50;
 
 // Runs inside the worker, so it must not refer to anything outside itself.
 export function installSelfHealingMessageChannel(scope, fallbackMs) {
@@ -22,17 +22,11 @@ export function installSelfHealingMessageChannel(scope, fallbackMs) {
             this.handler = null;
             this.isPending = false;
             this.port1 = { postMessage() { channel.post(); } };
-            this.port2 = {
-                get onmessage() { return channel.handler; },
-                set onmessage(handler) { channel.handler = handler; }
-            };
+            this.port2 = { set onmessage(handler) { channel.handler = handler; } };
             this.connect();
         }
 
         connect() {
-            if (this.realChannel) {
-                this.realChannel.port2.onmessage = null;
-            }
             this.realChannel = new RealMessageChannel();
             this.realChannel.port2.onmessage = () => this.deliver();
         }
@@ -45,8 +39,13 @@ export function installSelfHealingMessageChannel(scope, fallbackMs) {
                 if (!this.isPending) {
                     return;
                 }
+                const silentChannel = this.realChannel;
+                silentChannel.port2.onmessage = null;
                 this.connect();
                 this.deliver();
+                // Closed after the handler has run, so a close that throws can't hold the queue up.
+                silentChannel.port1.close();
+                silentChannel.port2.close();
             }, fallbackMs);
         }
 
@@ -68,7 +67,7 @@ export function useSelfHealingChannelInWorkers(maplibregl) {
         return;
     }
 
-    const bootstrap = `(${installSelfHealingMessageChannel})(self, ${fallbackMs});
+    const bootstrap = `(${installSelfHealingMessageChannel})(self, ${workerFallbackMs});
 importScripts(${JSON.stringify(workerUrl)});`;
     selfHealingWorkerUrl = URL.createObjectURL(new Blob([bootstrap], { type: 'text/javascript' }));
     maplibregl.setWorkerUrl(selfHealingWorkerUrl);
