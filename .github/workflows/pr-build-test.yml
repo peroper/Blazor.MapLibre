@@ -26,7 +26,7 @@ jobs:
       - name: Build projects
         run: dotnet build --no-restore -c Release
 
-      - name: Test tap targets
+      - name: Test JavaScript
         run: node --test tests/*.test.mjs
 
       - name: Test Library

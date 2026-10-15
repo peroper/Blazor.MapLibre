@@ -1,4 +1,5 @@
 import { queryIntersectingFeatures, queryTapTargetsOnMap } from './tapTargets.js';
+import { useSelfHealingChannelInWorkers } from './workerChannel.js';
 
 const mapInstances = {};
 const optionsInstances = {};
@@ -28,6 +29,7 @@ function cutAntiMeridian(container, data) {
  * @param {Object} dotnetReference - A .NET instance reference for invoking interop methods.
  */
 export function initializeMap(options, dotnetReference) {
+    useSelfHealingChannelInWorkers(maplibregl);
     const map = new maplibregl.Map(options);
 
     optionsInstances[options.container] = options;
